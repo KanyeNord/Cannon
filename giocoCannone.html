@@ -8,7 +8,24 @@
 </head>
 <script>
     "use strict";
-
+    let padre = document.getElementsByTagName("body")[0];
+    let listaPalle = [];
+function startPartita() {
+    let timerCreaPalle = window.setInterval(creaPalle, 10000); 
+    let timerMuoviPalle = window.setInterval(muoviPalle, 50); 
+    let cannone = document.createElement("img"); //crea il cannone
+    //scrivere personalizzazione
+    padre.appendChild(cannone);
+}
+    //creare oggetto palla che ha boolean delle direzioni, le coordinate, la propria immagine e quantità di vita
+function muoviPalle(){
+}
+function creaPalle(){
+    let palla = {sinistra: "boolean", x:0, y:0, immagine: "percorso dell'immagine", vita: 500, 
+let palla = document.createElement("img");
+    listaPalle.add(palla)
+    padre.appendChild(palla);
+}
 </script>
 <style>
     body {
