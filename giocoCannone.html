@@ -11,50 +11,57 @@
     //creare proiettili
     //sistemare movimento scrauso delle palle
     //creare movimento proiettili
+    //fare in modo che non scappi l'immagine dal bordo
+    //fare collisioni delle palle con il cannone
+    //fare vettore con immagini per palle di colore diverso
+    //muovi il cannone
 
     "use strict";
     let padre;
     function onload() {
         padre = document.getElementsByTagName("body")[0].querySelector("article");
-        console.log(padre);
     }
     let listaPalle = [];
     let timerCreaPalle;
     let timerMuoviPalle;
     let timerMuoviProiettili;
+    let passo= 100; //quanto si muove il cannone
+    let cannone = {x: 0, y:0};
     function startPartita() {
         timerCreaPalle = window.setInterval(creaPalle, 2000);
         timerMuoviPalle = window.setInterval(muoviPalle, 1);
+        document.addEventListener("keydown", muoviCannone);
         // timerMuoviProiettili = window.setInterval(muoviProiettili, 1);
-        let cannone = document.createElement("img"); //crea il cannone
-        cannone.src = "Cannone.png";
+        let corpoCannone = document.createElement("img"); //crea il cannone
+        corpoCannone.src = "Cannone.png";
+        cannone.corpo = corpoCannone;
         //scrivere personalizzazione
-        console.log(typeof (cannone))
-        padre.appendChild(cannone);
+        console.log(typeof (cannone.corpo));
+        padre.appendChild(cannone.corpo);
     }
     //creare oggetto palla che ha boolean delle direzioni, le coordinate, la propria immagine e quantità di vita
     function muoviPalle() {
+        
         for(let i = 0; i<listaPalle.length; i++){
+            //muove la x(destra e sinistra) delle palle
             if(listaPalle[i].destra){
                 listaPalle[i].x++;    
             } else {
-                listaPalle[i].x--
+                listaPalle[i].x--;
             }
             if(listaPalle[i].x>=window.innerWidth || listaPalle[i].x<=0){
                     listaPalle[i].destra=!listaPalle[i].destra;
                 }
-
-
-
-
+            //muove la y(su e giu) delle palle
             if(listaPalle[i].su){
                 listaPalle[i].y--;
             } else {
                 listaPalle[i].y++;
             }
-            if(listaPalle[i].x>=window.innerHeight || listaPalle[i].x<=0){
+            if(listaPalle[i].y>=window.innerHeight || listaPalle[i].y<=0){
                     listaPalle[i].su=!listaPalle[i].su;
                 }
+            // aggiunge i valori modificati negli oggetti alle proprietà css delle immagini
             listaPalle[i].corpo.style.left=listaPalle[i].x +"px";
             listaPalle[i].corpo.style.top=listaPalle[i].y +"px";
 
@@ -96,6 +103,28 @@
     // }
 
     function muoviProiettili(){
+
+    }
+    
+    function muoviCannone(event){
+        switch (event.key) {
+      case "ArrowLeft":
+      case "A":
+      case "a":
+        cannone.x-=passo;
+        break;
+      case "ArrowRight":
+      case "D":
+      case "d":
+      cannone.x+=passo;
+        break;
+        case "ArrowUp":
+      case "W":
+      case "w":
+      cannone.x+=passo;
+        break;
+    }
+    cannone.corpo.style.left = cannone.x +"px";
     }
 </script>
 <style>
@@ -132,7 +161,7 @@
     }
 </style>
  <!-- modificare i nomi delle cose nel body -->
-<body onload="onload()">
+<body onload="onload()", onkeypress="muoviCannone()">
     <article>
         gay
     </article>
