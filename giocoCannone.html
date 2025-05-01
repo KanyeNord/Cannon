@@ -8,89 +8,104 @@
 </head>
 <script>
     //TODO
-    //creare proiettili
-    //sistemare movimento scrauso delle palle
-    //creare movimento proiettili
-    //fare in modo che non scappi l'immagine dal bordo
-    //fare collisioni delle palle con il cannone
+    //fare in modo che non scappi l'immagine dal bordo (da fare dopo avere le grafiche finali delle palle)
     //fare vettore con immagini per palle di colore diverso
-    //muovi il cannone
+    //sistemare l'interfaccia e mettere le cose dove devono stare
+    //fare collisioni proiettile-palla
+    //URGENTE fare un intervallo apposito per i proiettili che si avvia alla pressione di w e si annulla quando rilasci 
+    //fare schermata sconfitta
+    //opzionali:
+    //migliorare fisica palle facendo sembrare che rimbalzino
+    //migliorare fisica delle palle impostando un'altezza a cui tornano giù
+    //fare un'animazione di scomparsa del menu per renderlo più carino
+    //ottimizzare i proiettili fermando il timer quando non si sta sparando
+    //ottimizzare i proiettili facendoli sparire se escono fuori dallo schermo
+    //fare in modo che il cannone non si fermi per un attimo quando cambi direzione
 
     "use strict";
     let padre;
     function onload() {
-        padre = document.getElementsByTagName("body")[0].querySelector("article");
+        padre = document.getElementsByTagName("body")[0].querySelector("div");
     }
     let listaPalle = [];
+    let listaProiettili = [];
     let timerCreaPalle;
     let timerMuoviPalle;
     let timerMuoviProiettili;
-    let passo= 100; //quanto si muove il cannone
-    let cannone = {x: 0, y:0};
+    let passo = 100; //quanto si muove il cannone
+    let cannone = { x: 0,};
     function startPartita() {
+        padre.querySelector("nav").style.display = "none";
         timerCreaPalle = window.setInterval(creaPalle, 2000);
         timerMuoviPalle = window.setInterval(muoviPalle, 1);
         document.addEventListener("keydown", muoviCannone);
-        // timerMuoviProiettili = window.setInterval(muoviProiettili, 1);
+        timerMuoviProiettili = window.setInterval(muoviProiettili, 1);
         let corpoCannone = document.createElement("img"); //crea il cannone
         corpoCannone.src = "Cannone.png";
         cannone.corpo = corpoCannone;
+        cannone.y= window.innerHeight-640;
+        cannone.corpo.style.top = cannone.y + "px";
         //scrivere personalizzazione
         console.log(typeof (cannone.corpo));
         padre.appendChild(cannone.corpo);
     }
     //creare oggetto palla che ha boolean delle direzioni, le coordinate, la propria immagine e quantità di vita
     function muoviPalle() {
-        
-        for(let i = 0; i<listaPalle.length; i++){
+        for (let i = 0; i < listaPalle.length; i++) {
             //muove la x(destra e sinistra) delle palle
-            if(listaPalle[i].destra){
-                listaPalle[i].x++;    
+            if (listaPalle[i].destra) {
+                listaPalle[i].x++;
             } else {
                 listaPalle[i].x--;
             }
-            if(listaPalle[i].x>=window.innerWidth || listaPalle[i].x<=0){
-                    listaPalle[i].destra=!listaPalle[i].destra;
-                }
+            if (listaPalle[i].x >= window.innerWidth || listaPalle[i].x <= 0) {
+                listaPalle[i].destra = !listaPalle[i].destra;
+            }
             //muove la y(su e giu) delle palle
-            if(listaPalle[i].su){
+            if (listaPalle[i].su) {
                 listaPalle[i].y--;
             } else {
                 listaPalle[i].y++;
             }
-            if(listaPalle[i].y>=window.innerHeight || listaPalle[i].y<=0){
-                    listaPalle[i].su=!listaPalle[i].su;
-                }
+            if (listaPalle[i].y >= window.innerHeight || listaPalle[i].y <= 0) {
+                listaPalle[i].su = !listaPalle[i].su;
+            }
             // aggiunge i valori modificati negli oggetti alle proprietà css delle immagini
-            listaPalle[i].corpo.style.left=listaPalle[i].x +"px";
-            listaPalle[i].corpo.style.top=listaPalle[i].y +"px";
+            listaPalle[i].corpo.style.left = listaPalle[i].x + "px";
+            listaPalle[i].corpo.style.top = listaPalle[i].y + "px";
 
-            console.log(typeof(listaPalle[i].corpo.style.left));
-            console.log(listaPalle[i].x);
+            collisioniPallaCannone();
+            collisioniProiettilePalla();
+
+            // console.log(typeof (listaPalle[i].corpo.style.innerWidth));
+            // console.log(listaPalle[i].x);
 
             // console.log(listaPalle[i].destra);
             // console.log(listaPalle[i].x);
             // console.log(listaPalle[i].su);
             // console.log(listaPalle[i].y);
+            
         }
     }
     function creaPalle() {
-        // window.clearInterval(timerCreaPalle);
-        let palla={ destra: Math.random()>0.5 ? true : false,
-                    su: false, //se la palla deve cadere oppure se rimbalza in su 
-                    
-                    y: 500, //all'inizio è uguale a yMax
-                    yMax: 0, //fissa oppure che cambia ogni volta ma non cambia in game, massima altezza rimbalzo
-                    immagine: "percorso dell'immagine", // forse non serve a un cazzo
-                    vita: 500, 
-                    corpo: document.createElement("img") }
-                    //elementi che dipendono da altri vanno creati dopo
-                    palla.x= palla.destra ? 0 : window.innerHeight, //o tutto sinistra o tutto destra, dipende dalla proprietà destra all'inizio
-        // let palla = document.createElement("img");
-        // console.log(Math.random()>0.5 ? true : false);
-        palla.corpo.src = "Pallina.png";
+        
+        let palla = {
+            destra: Math.random() > 0.5 ? true : false,
+            su: false, //se la palla deve cadere oppure se rimbalza in su 
+            y: 0, //all'inizio è uguale a yMax
+            yMax: 0, //fissa oppure che cambia ogni volta ma non cambia in game, massima altezza rimbalzo
+            immagine: "percorso dell'immagine", // forse non serve a un cazzo
+            vita: 500,
+            corpo: document.createElement("img")
+        }
+        //elementi che dipendono da altri vanno creati dopo
+        palla.x = palla.destra ? 0 : window.innerWidth, //o tutto sinistra o tutto destra, dipende dalla proprietà destra all'inizio
+        palla.corpo.style.left= palla.x + "px";
+            // console.log(Math.random()>0.5 ? true : false);
+            palla.corpo.src = "Pallina.png";
         listaPalle.push(palla);
         padre.appendChild(palla.corpo);
+        window.clearInterval(timerCreaPalle);
     }
     // let listaCorpoPalle = [];
     // function creaPalle() {
@@ -102,32 +117,93 @@
     //     padre.appendChild(corpoPalla);
     // }
 
-    function muoviProiettili(){
+    function muoviProiettili() {
+        for (let i = 0; i < listaProiettili.length; i++) {
+            listaProiettili[i].y -= 50;
+            listaProiettili[i].corpo.style.top = listaProiettili[i].y + "px";
+        }
+    }
+    function creaProiettile() {
+        let proiettile = { y: 1000, x: cannone.x, corpo: document.createElement("img") };
+        proiettile.corpo.src = "Proiettile.png";
+        listaProiettili.push(proiettile);
+        proiettile.corpo.style.top = proiettile.y + "px";
+        proiettile.corpo.style.left = proiettile.x + "px";
+        padre.appendChild(proiettile.corpo);
+    }
+    function muoviCannone(event) {
+    if (event.key === "ArrowLeft" || event.key === "A" || event.key === "a") {
+        if(cannone.x-passo>=0){
+        cannone.x -= passo;
+    }
+    } else if (event.key === "ArrowRight" || event.key === "D" || event.key === "d") {
+        if(cannone.x+passo<=window.innerWidth-640){
+        cannone.x += passo;
+        }
+    } else if (event.key === "ArrowUp" || event.key === "W" || event.key === "w") {
+        creaProiettile();
+    }
 
+        cannone.corpo.style.left = cannone.x + "px";
     }
-    
-    function muoviCannone(event){
-        switch (event.key) {
-      case "ArrowLeft":
-      case "A":
-      case "a":
-        cannone.x-=passo;
-        break;
-      case "ArrowRight":
-      case "D":
-      case "d":
-      cannone.x+=passo;
-        break;
-        case "ArrowUp":
-      case "W":
-      case "w":
-      cannone.x+=passo;
-        break;
+    //cambiare dimensioni immagini con variabili
+    function collisioniPallaCannone(){
+        for(let i = 0; i<listaPalle.length; i++){
+            if(listaPalle[i].y+368>=cannone.y){
+        if((listaPalle[i].x>=cannone.x && listaPalle[i].x<=cannone.x+640) || (listaPalle[i].x+423>=cannone.x && listaPalle[i].x+423<=cannone.x+640)){
+            //hittato
+
+        }}
+        }
     }
-    cannone.corpo.style.left = cannone.x +"px";
+    function collisioniProiettilePalla(){
+        for(let j=0; j<listaPalle.length; j++){
+        for(let i = 0; i<listaProiettili.length; i++){
+            console.log(((listaProiettili[i].x>=listaPalle[j].x && listaProiettili[i].x+200<=listaPalle[j].x) || (listaProiettili[i].x+200>=listaPalle[j].x && listaProiettili[i].x+200<=listaPalle[j].x+423)) && ((listaProiettili[i].y>=listaPalle[j].y && listaProiettili[i].y+200<=listaPalle[j].y) || (listaProiettili[i].y+200>=listaPalle[j].y && listaProiettili[i].y+200<=listaPalle[j].y+368)));
+        if((listaProiettili[i].x>=listaPalle[j].x && listaProiettili[i].x+200<=listaPalle[j].x) || (listaProiettili[i].x+200>=listaPalle[j].x && listaProiettili[i].x+200<=listaPalle[j].x+423) || (listaProiettili[i].y>=listaPalle[j].y && listaProiettili[i].y+200<=listaPalle[j].y) || (listaProiettili[i].y+200>=listaPalle[j].y && listaProiettili[i].y+200<=listaPalle[j].y+368)){
+            //hittato
+
+        }}
+    }
     }
 </script>
 <style>
+    body {
+        background-color: darkblue;
+        margin: 0;
+        height: 100vh;
+        overflow: hidden;
+    }
+
+    div {
+        background-color: green;
+        height: 100vh;
+    }
+
+    div nav {
+        position: fixed;
+        bottom: 0;
+        width: 100vw;
+        background-color: brown;
+        display: flex;
+    }
+
+    div nav img {
+        height: 239px;
+        width: 20%;
+    }
+
+    div > img{
+        position: fixed;
+    }
+</style>
+<body onload="onload()" , onkeypress="muoviCannone()">
+    <div>
+        <nav><img src="Coez.PNG" onclick="startPartita()"><img src="Coez.PNG" onclick="startPartita()"><img src="Coez.PNG" onclick="startPartita()"><img src="Coez.PNG" onclick="startPartita()"><img src="Coez.PNG" onclick="startPartita()"></nav>
+    </div>
+    
+</body>
+<!-- <style>
     body {
         background-color: darkblue;
         margin: 0;
@@ -154,26 +230,24 @@
     footer img {
         height: 239px;
         width: 20%;
-        border-collapse: collapse;
     }
-    article img{
+
+    article img {
         position: fixed;
     }
 </style>
- <!-- modificare i nomi delle cose nel body -->
-<body onload="onload()", onkeypress="muoviCannone()">
+modificare i nomi delle cose nel body
+
+<body onload="onload()" , onkeypress="muoviCannone()">
     <article>
         gay
     </article>
     <footer>
-        <!-- <button> gay</button> -->
-        <img src="Coez.PNG" onclick="startPartita()">
-        <img src="Coez.PNG" onclick="startPartita()">
-        <img src="Coez.PNG" onclick="startPartita()">
-        <img src="Coez.PNG" onclick="startPartita()">
-        <img src="Coez.PNG" onclick="startPartita()">
+        <button> gay</button>
+        <img src="Coez.PNG" onclick="startPartita()"><img src="Coez.PNG" onclick="startPartita()"><img src="Coez.PNG"
+            onclick="startPartita()"><img src="Coez.PNG" onclick="startPartita()"><img src="Coez.PNG"
+            onclick="startPartita()">
     </footer>
-
-</body>
+</body> -->
 
 </html>
