@@ -7,43 +7,54 @@
     <title>Cannon Blast</title>
 </head>
 <script>
-    //TODO
-    //fare in modo che non scappi l'immagine dal bordo (da fare dopo avere le grafiche finali delle palle)
-    //fare vettore con immagini per palle di colore diverso
-    //sistemare l'interfaccia e mettere le cose dove devono stare
-    //fare collisioni proiettile-palla
-    //URGENTE fare un intervallo apposito per i proiettili che si avvia alla pressione di w e si annulla quando rilasci 
-    //fare schermata sconfitta
+    //principali:
+    //TODO: sistemare l'interfaccia e mettere le cose dove devono stare
+    //TODO: fare schermata sconfitta
+    //TODO: fare uno sfondo
+    //TODO: fare in modo di poter premere più tasti alla volta senza scatti
+    //FIXME: migliorare le collisioni perchè sono un po freaky
+    //FIXME: URGENTE le palle smettono di spawnare a caso (di solito quando le distruggi tutte oppure dopo che hai sparato)
+    //BUG: fixare le scritte delle palle che si sovrappongono tra di loro (magari facendo un random che alla generazione delle scritte insierisce zindex alle palle e scritte di 1/2 o 3/4)
     //opzionali:
-    //migliorare fisica palle facendo sembrare che rimbalzino
-    //migliorare fisica delle palle impostando un'altezza a cui tornano giù
-    //fare un'animazione di scomparsa del menu per renderlo più carino
-    //ottimizzare i proiettili fermando il timer quando non si sta sparando
-    //ottimizzare i proiettili facendoli sparire se escono fuori dallo schermo
-    //fare in modo che il cannone non si fermi per un attimo quando cambi direzione
-
+    //TODO: modalità con rimbalzi random
+    //TODO: migliorare fisica palle facendo sembrare che rimbalzino
+    //TODO: migliorare fisica delle palle impostando un'altezza a cui tornano giù
+    //TODO: fare un'animazione di scomparsa del menu per renderlo più carino
+    //BUG: ottimizzare i proiettili facendoli sparire se escono fuori dallo schermo MEGLIO
+    
     "use strict";
     let padre;
     function onload() {
         padre = document.getElementsByTagName("body")[0].querySelector("div");
     }
+    let dimensioniCannoneWidth = 200;
+    let dimensioniCannoneHeight = 200;
+    let dimensioniPalleWidth = 200;
+    let dimensioniPalleHeight = 200;
+    let dimensioniProiettiliWidth = 200;
+    let dimensioniProiettiliHeight = 200;
     let listaPalle = [];
     let listaProiettili = [];
+    let listaGrafichePalle = ["Palla1.png", "Palla2.png", "Palla3.png", "Palla4.png"];
     let timerCreaPalle;
     let timerMuoviPalle;
     let timerMuoviProiettili;
+    let timerSvuotaProiettili
     let passo = 100; //quanto si muove il cannone
-    let cannone = { x: 0,};
+    let cannone = { x: 0, };
+    let danno = 50;
+    let controllaCollisioni = false;
     function startPartita() {
         padre.querySelector("nav").style.display = "none";
         timerCreaPalle = window.setInterval(creaPalle, 2000);
         timerMuoviPalle = window.setInterval(muoviPalle, 1);
-        document.addEventListener("keydown", muoviCannone);
+        document.addEventListener("keydown", tastoPremuto);
+        document.addEventListener("keyup", tastoRilasciato);
         timerMuoviProiettili = window.setInterval(muoviProiettili, 1);
         let corpoCannone = document.createElement("img"); //crea il cannone
-        corpoCannone.src = "Cannone.png";
+        corpoCannone.src = "Cannone1.png";
         cannone.corpo = corpoCannone;
-        cannone.y= window.innerHeight-640;
+        cannone.y = window.innerHeight - dimensioniCannoneHeight;
         cannone.corpo.style.top = cannone.y + "px";
         //scrivere personalizzazione
         console.log(typeof (cannone.corpo));
@@ -58,7 +69,7 @@
             } else {
                 listaPalle[i].x--;
             }
-            if (listaPalle[i].x >= window.innerWidth || listaPalle[i].x <= 0) {
+            if (listaPalle[i].x+dimensioniPalleWidth >= window.innerWidth || listaPalle[i].x <= 0) {
                 listaPalle[i].destra = !listaPalle[i].destra;
             }
             //muove la y(su e giu) delle palle
@@ -67,16 +78,20 @@
             } else {
                 listaPalle[i].y++;
             }
-            if (listaPalle[i].y >= window.innerHeight || listaPalle[i].y <= 0) {
+            if (listaPalle[i].y+dimensioniPalleHeight >= window.innerHeight || listaPalle[i].y <= 0) {
                 listaPalle[i].su = !listaPalle[i].su;
             }
             // aggiunge i valori modificati negli oggetti alle proprietà css delle immagini
             listaPalle[i].corpo.style.left = listaPalle[i].x + "px";
+            listaPalle[i].scritta.style.left = listaPalle[i].x + "px";
             listaPalle[i].corpo.style.top = listaPalle[i].y + "px";
+            listaPalle[i].scritta.style.top = listaPalle[i].y + "px";
 
             collisioniPallaCannone();
-            collisioniProiettilePalla();
 
+            if (controllaCollisioni) {
+                collisioniProiettilePalla();
+            }
             // console.log(typeof (listaPalle[i].corpo.style.innerWidth));
             // console.log(listaPalle[i].x);
 
@@ -84,28 +99,40 @@
             // console.log(listaPalle[i].x);
             // console.log(listaPalle[i].su);
             // console.log(listaPalle[i].y);
-            
+
         }
     }
     function creaPalle() {
-        
+
         let palla = {
             destra: Math.random() > 0.5 ? true : false,
             su: false, //se la palla deve cadere oppure se rimbalza in su 
             y: 0, //all'inizio è uguale a yMax
             yMax: 0, //fissa oppure che cambia ogni volta ma non cambia in game, massima altezza rimbalzo
-            immagine: "percorso dell'immagine", // forse non serve a un cazzo
+            immagine: listaGrafichePalle[Math.floor(Math.random() * 4)],
             vita: 500,
-            corpo: document.createElement("img")
+            corpo: document.createElement("img"),
+            scritta: document.createElement("p")
         }
         //elementi che dipendono da altri vanno creati dopo
         palla.x = palla.destra ? 0 : window.innerWidth, //o tutto sinistra o tutto destra, dipende dalla proprietà destra all'inizio
-        palla.corpo.style.left= palla.x + "px";
-            // console.log(Math.random()>0.5 ? true : false);
-            palla.corpo.src = "Pallina.png";
+            palla.corpo.style.left = palla.x + "px";
+        palla.scritta.style.left = palla.x + "px";
+        // console.log(Math.random()>0.5 ? true : false);
+        palla.corpo.src = palla.immagine;
+        palla.scritta.style.zIndex = 2;
+        palla.scritta.style.height = dimensioniPalleHeight / 2 + "px";
+        palla.scritta.style.width = dimensioniPalleWidth + "px";
+        palla.scritta.style.paddingTop = dimensioniPalleHeight / 4 + "px";
         listaPalle.push(palla);
         padre.appendChild(palla.corpo);
-        window.clearInterval(timerCreaPalle);
+        palla.scritta.innerText = palla.vita;
+        padre.appendChild(palla.scritta);
+
+
+
+        // window.clearInterval(timerCreaPalle);
+        // window.clearInterval(timerMuoviPalle);
     }
     // let listaCorpoPalle = [];
     // function creaPalle() {
@@ -121,6 +148,10 @@
         for (let i = 0; i < listaProiettili.length; i++) {
             listaProiettili[i].y -= 50;
             listaProiettili[i].corpo.style.top = listaProiettili[i].y + "px";
+            if (listaProiettili[i].y <= 0) {
+                padre.removeChild(listaProiettili[i].corpo);
+                listaProiettili.splice(i, 1);
+            }
         }
     }
     function creaProiettile() {
@@ -131,40 +162,86 @@
         proiettile.corpo.style.left = proiettile.x + "px";
         padre.appendChild(proiettile.corpo);
     }
-    function muoviCannone(event) {
-    if (event.key === "ArrowLeft" || event.key === "A" || event.key === "a") {
-        if(cannone.x-passo>=0){
-        cannone.x -= passo;
-    }
-    } else if (event.key === "ArrowRight" || event.key === "D" || event.key === "d") {
-        if(cannone.x+passo<=window.innerWidth-640){
-        cannone.x += passo;
+    function tastoPremuto(event) {
+        if (event.key === "ArrowLeft" || event.key === "A" || event.key === "a") {
+            if (cannone.x - passo >= 0) {
+                cannone.x -= passo;
+            }
         }
-    } else if (event.key === "ArrowUp" || event.key === "W" || event.key === "w") {
-        creaProiettile();
-    }
-
+        if (event.key === "ArrowRight" || event.key === "D" || event.key === "d") {
+            if (cannone.x + passo <= window.innerWidth - dimensioniCannoneWidth) {
+                cannone.x += passo;
+            }
+        }
+        if (event.key === "ArrowUp" || event.key === "W" || event.key === "w") {
+            creaProiettile();
+            controllaCollisioni = true;
+        }
         cannone.corpo.style.left = cannone.x + "px";
     }
-    //cambiare dimensioni immagini con variabili
-    function collisioniPallaCannone(){
-        for(let i = 0; i<listaPalle.length; i++){
-            if(listaPalle[i].y+368>=cannone.y){
-        if((listaPalle[i].x>=cannone.x && listaPalle[i].x<=cannone.x+640) || (listaPalle[i].x+423>=cannone.x && listaPalle[i].x+423<=cannone.x+640)){
-            //hittato
-
-        }}
+    function tastoRilasciato(event) {
+        if (event.key === "ArrowUp" || event.key === "W" || event.key === "w") {
+            timerSvuotaProiettili = window.setInterval(svuotaProiettili, 50)
         }
     }
-    function collisioniProiettilePalla(){
-        for(let j=0; j<listaPalle.length; j++){
-        for(let i = 0; i<listaProiettili.length; i++){
-            console.log(((listaProiettili[i].x>=listaPalle[j].x && listaProiettili[i].x+200<=listaPalle[j].x) || (listaProiettili[i].x+200>=listaPalle[j].x && listaProiettili[i].x+200<=listaPalle[j].x+423)) && ((listaProiettili[i].y>=listaPalle[j].y && listaProiettili[i].y+200<=listaPalle[j].y) || (listaProiettili[i].y+200>=listaPalle[j].y && listaProiettili[i].y+200<=listaPalle[j].y+368)));
-        if((listaProiettili[i].x>=listaPalle[j].x && listaProiettili[i].x+200<=listaPalle[j].x) || (listaProiettili[i].x+200>=listaPalle[j].x && listaProiettili[i].x+200<=listaPalle[j].x+423) || (listaProiettili[i].y>=listaPalle[j].y && listaProiettili[i].y+200<=listaPalle[j].y) || (listaProiettili[i].y+200>=listaPalle[j].y && listaProiettili[i].y+200<=listaPalle[j].y+368)){
-            //hittato
-
-        }}
+    function svuotaProiettili(){
+        if(listaProiettili.length==0){
+            window.clearInterval(timerSvuotaProiettili);
+            window.clearInterval(timerCreaPalle);
+            controllaCollisioni=false;
+        }
     }
+    //cambiare dimensioni immagini con variabili
+    function collisioniPallaCannone() {
+        for (let i = 0; i < listaPalle.length; i++) {
+            if (listaPalle[i].y + dimensioniPalleHeight >= cannone.y) {
+                if ((listaPalle[i].x >= cannone.x && listaPalle[i].x <= cannone.x + dimensioniCannoneWidth) || (listaPalle[i].x + dimensioniPalleWidth >= cannone.x && listaPalle[i].x + dimensioniPalleWidth <= cannone.x + dimensioniCannoneWidth)) {
+                    //hittato
+                    // let schermataSconfitta = document.createElement("div");
+                    // schermataSconfitta.innerHTML = "gay";
+                    // padre.appendChild(schermataSconfitta);
+                    // window.clearInterval(timerCreaPalle);
+                    // window.clearInterval(timerMuoviPalle);
+                    // window.clearInterval(timerMuoviProiettili);
+                    // window.clearInterval(timerSvuotaProiettili);
+                    
+                }
+            }
+        }
+    }
+    function collisioniProiettilePalla() {
+        for (let j = 0; j < listaPalle.length; j++) {
+            for (let i = 0; i < listaProiettili.length; i++) {
+                console.log(((listaProiettili[i].x>=listaPalle[j].x && listaProiettili[i].x+dimensioniProiettiliWidth<=listaPalle[j].x)
+                 || 
+                 (listaProiettili[i].x+dimensioniProiettiliWidth>=listaPalle[j].x && listaProiettili[i].x+dimensioniProiettiliWidth<=listaPalle[j].x+dimensioniPalleWidth))
+                  && 
+                  ((listaProiettili[i].y>=listaPalle[j].y && listaProiettili[i].y+dimensioniProiettiliHeight<=listaPalle[j].y)
+                   || 
+                   (listaProiettili[i].y+dimensioniProiettiliHeight>=listaPalle[j].y && listaProiettili[i].y+dimensioniProiettiliHeight<=listaPalle[j].y+dimensioniPalleHeight)));
+
+
+
+                if (((listaProiettili[i].x >= listaPalle[j].x && listaProiettili[i].x + dimensioniProiettiliWidth <= listaPalle[j].x)
+                 || 
+                (listaProiettili[i].x + dimensioniProiettiliWidth >= listaPalle[j].x && listaProiettili[i].x + dimensioniProiettiliWidth <= listaPalle[j].x + dimensioniPalleWidth))
+                 && 
+                 ((listaProiettili[i].y >= listaPalle[j].y && listaProiettili[i].y + dimensioniProiettiliHeight <= listaPalle[j].y)
+                  || 
+                  (listaProiettili[i].y + dimensioniProiettiliHeight >= listaPalle[j].y && listaProiettili[i].y + dimensioniProiettiliHeight <= listaPalle[j].y + dimensioniPalleHeight))) {
+                    //hittato
+                    padre.removeChild(listaProiettili[i].corpo);
+                    listaProiettili.splice(i, 1);
+                    listaPalle[j].vita -= danno;
+                    listaPalle[j].scritta.innerText = listaPalle[j].vita;
+                    if (listaPalle[j].vita <= 0) {
+                        padre.removeChild(listaPalle[j].corpo);
+                        padre.removeChild(listaPalle[j].scritta);
+                        listaPalle.splice(j, 1);
+                    }
+                }
+            }
+        }
     }
 </script>
 <style>
@@ -175,7 +252,7 @@
         overflow: hidden;
     }
 
-    div {
+    body > div {
         background-color: green;
         height: 100vh;
     }
@@ -193,61 +270,31 @@
         width: 20%;
     }
 
-    div > img{
+    div>img {
         position: fixed;
     }
-</style>
-<body onload="onload()" , onkeypress="muoviCannone()">
-    <div>
-        <nav><img src="Coez.PNG" onclick="startPartita()"><img src="Coez.PNG" onclick="startPartita()"><img src="Coez.PNG" onclick="startPartita()"><img src="Coez.PNG" onclick="startPartita()"><img src="Coez.PNG" onclick="startPartita()"></nav>
-    </div>
-    
-</body>
-<!-- <style>
-    body {
-        background-color: darkblue;
+
+    p {
+        position: fixed;
+        color: blue;
+        font-size: 5em;
+        text-align: center;
         margin: 0;
-        height: 100vh;
-        overflow: hidden;
-        display: grid;
-        grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
-        grid-template-rows: 7fr 1fr;
-        grid-template-areas:
-            "article article article article article"
-            "footer footer footer footer footer";
+        text-shadow: 2px 2px 0 white;
     }
 
-    article {
-        grid-area: article;
-        background-color: green;
-    }
-
-    footer {
-        grid-area: footer;
-        background-color: brown;
-    }
-
-    footer img {
-        height: 239px;
-        width: 20%;
-    }
-
-    article img {
-        position: fixed;
+    div div {
+        background-color: aqua;
     }
 </style>
-modificare i nomi delle cose nel body
 
-<body onload="onload()" , onkeypress="muoviCannone()">
-    <article>
-        gay
-    </article>
-    <footer>
-        <button> gay</button>
-        <img src="Coez.PNG" onclick="startPartita()"><img src="Coez.PNG" onclick="startPartita()"><img src="Coez.PNG"
-            onclick="startPartita()"><img src="Coez.PNG" onclick="startPartita()"><img src="Coez.PNG"
-            onclick="startPartita()">
-    </footer>
-</body> -->
+<body onload="onload()">
+    <div>
+        <nav><img src="Coez.PNG" onclick="startPartita()"><img src="Coez.PNG" onclick="startPartita()"><img
+                src="Coez.PNG" onclick="startPartita()"><img src="Coez.PNG" onclick="startPartita()"><img src="Coez.PNG"
+                onclick="startPartita()"></nav>
+    </div>
+
+</body>
 
 </html>
