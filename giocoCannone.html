@@ -19,6 +19,7 @@
     //FIXME: se stai fermo alcune volte le palle non spawnano
     //BUG: fixare le scritte delle palle che si sovrappongono tra di loro (magari facendo un random che alla generazione delle scritte insierisce zindex alle palle e scritte di 1/2 o 3/4)
     //opzionali:
+    //sostituire i bottoni immagini con dei button per poterli premere con tab
     //livelli
     //barra di riempimento di fine livello
     //TODO: modalità con rimbalzi random
@@ -45,39 +46,64 @@
     let timerCreaPalle;
     let timerMuoviPalle;
     let timerMuoviProiettili;
-    let timerSvuotaProiettili
+    let timerSvuotaProiettili;
+    let timerDurataPartita;
     let passo = 100; //quanto si muove il cannone
     let cannone;
     let danno = 50;
     let controllaCollisioni = false;
     let morte = false;
-    let sconfitta;
-    function cambioSezione(){
-        for(let i = 0; i<=padre.querySelectorAll("*:not(.menu)").length && padre.querySelector("*:not(.menu)")!=null; i++){
-            if(padre.querySelector("*:not(.menu)")!=null){
-                padre.removeChild(padre.querySelector("*:not(.menu)"));
-            }
-        }
+    let schermataGioco;
+    let monete = 0;
+    let moneteDurantePartita = 0;
+    let gemme = 0;
+    let gemmeDurantePartita = 0;
+    function cambioSezione() {
+        while (padre.querySelector("*:not(.menu)")) {
+    padre.removeChild(padre.querySelector("*:not(.menu)"));
+    // console.log(padre.querySelector("*:not(.menu)"));
+}
     }
-    function sezioneEndless(){
+    //record precedente di palle uccise o di tempo sopravvissuto
+    function sezioneEndless() { //schermatasconfitta diventa schermata di avvio livello e questa sezione lo crea
+        cambioSezione();
+        creaSchermata();
+        schermataGioco.innerHTML = "<h2>Endless Mode</h2> <span><p>Record: 531408 palle distrutte/tempo sopravvissuto <button>Gioca</button>";
+        schermataGioco.querySelector("button").addEventListener("click", startPartitaEndless); //mhh me puzza
+    }
+    function sezioneLivelli() {
+        cambioSezione();
 
+        //seleziona i livelli e quando seleziona uno dei livelli compare schermata gioco
+        // creaSchermata();
+        // schermataGioco.innerHTML = "<h2>Endless Mode</h2> <span><p>Record: 531408 palle distrutte/tempo sopravvissuto <button>Gioca</button>";
+        //     schermataGioco.querySelector("button").addEventListener("click", startPartita); //mhh me puzza
     }
-    function sezioneLivelli(){
-        
+    function sezioneNegozio() {
+        cambioSezione();
     }
-    function sezioneNegozio(){
-        
+    function sezioneGuardaroba() {
+        cambioSezione();
     }
-    function sezioneGuardaroba(){
-        
+    function sezioneImpostazioni() {
+        cambioSezione();
     }
-    function sezioneImpostazioni(){
-        
+    function creaSchermata() {
+        schermataGioco = document.createElement("div");
+        schermataGioco.style.textAlign = "center";
+        schermataGioco.style.position = "fixed";
+        schermataGioco.style.zIndex = 3;
+        schermataGioco.style.marginTop = window.innerHeight / 4 + "px";
+        schermataGioco.style.marginLeft = window.innerWidth / 4 + "px";
+        schermataGioco.style.height = window.innerHeight / 2 + "px";
+        schermataGioco.style.width = window.innerWidth / 2 + "px";
+        padre.appendChild(schermataGioco);
     }
-    function startPartita() {  
+    function startPartitaEndless() {
         cambioSezione();
         morte = false;
         padre.querySelector("nav").style.display = "none";
+        timerDurataPartita = window.setInterval(function(){gemmeDurantePartita++}, 10000);
         timerCreaPalle = window.setInterval(creaPalle, 2000);
         timerMuoviPalle = window.setInterval(muoviPalle, 1);
         document.addEventListener("keydown", tastoPremuto);
@@ -87,10 +113,10 @@
         creaCannone();
         padre.appendChild(cannone.corpo);
     }
-    function creaCannone(){
+    function creaCannone() {
         let corpoCannone = document.createElement("img"); //crea il cannone
         corpoCannone.src = "Cannone1.png";
-        cannone = {x: window.innerWidth/2-dimensioniCannoneWidth/2, y: window.innerHeight - dimensioniCannoneHeight, corpo: corpoCannone};
+        cannone = { x: window.innerWidth / 2 - dimensioniCannoneWidth / 2, y: window.innerHeight - dimensioniCannoneHeight, corpo: corpoCannone };
         cannone.corpo.style.left = cannone.x + "px";
         cannone.corpo.style.top = cannone.y + "px";
     }
@@ -175,13 +201,13 @@
         }
     }
     function creaProiettile() {
-        if(morte==false){
-        let proiettile = { y: cannone.y - dimensioniProiettiliHeight, x: cannone.x, corpo: document.createElement("img") };
-        proiettile.corpo.src = "Proiettile.png";
-        listaProiettili.push(proiettile);
-        proiettile.corpo.style.top = proiettile.y + "px";
-        proiettile.corpo.style.left = proiettile.x + "px";
-        padre.appendChild(proiettile.corpo);
+        if (morte == false) {
+            let proiettile = { y: cannone.y - dimensioniProiettiliHeight, x: cannone.x, corpo: document.createElement("img") };
+            proiettile.corpo.src = "Proiettile.png";
+            listaProiettili.push(proiettile);
+            proiettile.corpo.style.top = proiettile.y + "px";
+            proiettile.corpo.style.left = proiettile.x + "px";
+            padre.appendChild(proiettile.corpo);
         }
     }
     function tastoPremuto(event) {
@@ -223,8 +249,13 @@
                     window.clearInterval(timerMuoviPalle);
                     window.clearInterval(timerMuoviProiettili);
                     window.clearInterval(timerSvuotaProiettili);
+                    window.clearInterval(timerDurataPartita);
                     if (morte) { //senza la boolean si crea la schermataSconfitta 2 volte
                         schermataSconfitta();
+                        monete+=moneteDurantePartita;
+                        gemme+=gemmeDurantePartita;
+                        moneteDurantePartita=0;
+                        gemmeDurantePartita=0;
                     }
                     morte = true;
                 }
@@ -232,28 +263,20 @@
         }
     }
     function schermataSconfitta() {
-        sconfitta = document.createElement("div");
-        sconfitta.innerHTML = "<h2> Hai perso!</h2> <span><p>monete ottenute: 69</p><p>gemme ottenute: 104</p></span> <button>riprova</button>";
-        sconfitta.querySelector("button").addEventListener("click", startPartita); //mhh me puzza
-        sconfitta.style.textAlign = "center";
-        sconfitta.style.position = "fixed";
-        sconfitta.style.zIndex = 3;
-        sconfitta.style.marginTop = window.innerHeight / 4 + "px";
-        sconfitta.style.marginLeft = window.innerWidth / 4 + "px";
-        sconfitta.style.height = window.innerHeight / 2 + "px";
-        sconfitta.style.width = window.innerWidth / 2 + "px";
-
-        for(let i = 0; i<listaPalle.length; i++){
+        creaSchermata();
+        schermataGioco.innerHTML = "<h2> Hai perso!</h2> <span><p>monete ottenute: " + moneteDurantePartita + "</p><p>gemme ottenute: " + gemmeDurantePartita + "</p></span> <button>riprova</button>";
+        schermataGioco.querySelector("button").addEventListener("click", startPartitaEndless); //mhh me puzza
+        for (let i = 0; i < listaPalle.length; i++) {
             padre.removeChild(listaPalle[i].corpo);
             padre.removeChild(listaPalle[i].scritta);
         }
-        for(let i = 0; i<listaProiettili.length; i++){
+        for (let i = 0; i < listaProiettili.length; i++) {
             padre.removeChild(listaProiettili[i].corpo);
         }
         listaPalle.splice(0, listaPalle.length);
         listaPalle.splice(0, listaProiettili.length);
         padre.removeChild(cannone.corpo);
-        padre.appendChild(sconfitta);
+        padre.querySelector("nav").style.display = "";
     }
     function collisioniProiettilePalla() {
         for (let j = 0; j < listaPalle.length; j++) {
@@ -286,6 +309,7 @@
                         padre.removeChild(listaPalle[j].corpo);
                         padre.removeChild(listaPalle[j].scritta);
                         listaPalle.splice(j, 1);
+                        moneteDurantePartita+=5;
                     }
                 }
             }
@@ -333,16 +357,20 @@
 
     div div {
         background-color: aqua;
+        display: inline-block;
     }
 </style>
 
 <body onload="onload()">
     <div>
-        <nav class="menu"><img class="menu" src="Coez.PNG" onclick="startPartita()"><img class="menu" src="Coez.PNG" onclick="startPartita()"><img class="menu"
-                src="Coez.PNG" onclick="startPartita()"><img class="menu" src="Coez.PNG" onclick="startPartita()"><img class="menu" src="Coez.PNG"
-                onclick="startPartita()"></nav>
+        <nav class="menu">
+            <img class="menu" src="Coez.PNG" onclick="sezioneEndless()">
+            <img class="menu" src="Coez.PNG" onclick="sezioneLivelli()">
+            <img class="menu" src="Coez.PNG" onclick="sezioneNegozio()">
+            <img class="menu" src="Coez.PNG" onclick="sezioneGuardaroba()">
+            <img class="menu" src="Coez.PNG" onclick="sezioneImpostazioni()">
+        </nav>
     </div>
 
 </body>
-
 </html>
