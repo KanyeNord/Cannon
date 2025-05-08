@@ -260,7 +260,11 @@
         if (event.key === "ArrowLeft" || event.key === "A" || event.key === "a") {
             console.log(timerCannoneSinistra);
             if (!timerCannoneSinistra) {
-            timerCannoneSinistra = window.setInterval(function(){if(cannone.x - passo >= 0){
+                if(timerCannoneDestra){
+                window.clearInterval(timerCannoneDestra);
+                timerCannoneDestra=undefined;
+                }
+                timerCannoneSinistra = window.setInterval(function(){if(cannone.x - passo >= 0){
                 cannone.x -= passo;
                 cannone.corpo.style.left = cannone.x + "px";
             }}, 50);
@@ -269,7 +273,11 @@
         }
         if (event.key === "ArrowRight" || event.key === "D" || event.key === "d") {
             if (!timerCannoneDestra) {
-            timerCannoneDestra = window.setInterval(function(){if(cannone.x + passo <= window.innerWidth - dimensioniCannoneWidth){
+                if(timerCannoneSinistra){
+                window.clearInterval(timerCannoneSinistra);
+                timerCannoneSinistra=undefined;
+                }
+                timerCannoneDestra = window.setInterval(function(){if(cannone.x + passo <= window.innerWidth - dimensioniCannoneWidth){
                 cannone.x += passo;
                 cannone.corpo.style.left = cannone.x + "px";
             }}, 50);
@@ -289,10 +297,12 @@
     function tastoRilasciato(event) {
         if (event.key === "ArrowLeft" || event.key === "A" || event.key === "a") {
             window.clearInterval(timerCannoneSinistra);
+            timerCannoneSinistra=undefined;
             console.log(event.key);
         }
         if (event.key === "ArrowRight" || event.key === "D" || event.key === "d") {
             window.clearInterval(timerCannoneDestra);
+            timerCannoneDestra=undefined;
             console.log(event.key);
         }
         if (event.key === "ArrowUp" || event.key === "W" || event.key === "w") {
