@@ -8,6 +8,7 @@
 </head>
 <script>
     //principali:
+    //TODO: in corso: comandi per muoversi e problema con set interval
     //TODO: assegnare valori diversi alla quantità di palle, forse la loro velocità, e magari il tempo a disposizione per completare il livello in base al livello selezionato
     //TODO: se ci sono alcuni oggetti con classi e proprietà attribuite da javascript, mettere le proprietà su css
     //TODO: Inserire limite massimo di palle presenti su schermo
@@ -22,6 +23,7 @@
     //BUG: fixare le scritte delle palle che si sovrappongono tra di loro (magari facendo un random che alla generazione delle scritte insierisce zindex alle palle e scritte di 1/2 o 3/4)
     //FIXME: se tieni premuto lo sparaproiettili mentre muori quando ricominci il gioco i proiettili sparati sono immobili e da errore
     //opzionali:
+    //forse cancellare il div iniziale in quanto uguale al body
     //sostituire i bottoni immagini con dei button per poterli premere con tab
     //barra di riempimento di fine livello
     //TODO: modalità con rimbalzi random
@@ -60,11 +62,14 @@
     let moneteDurantePartita = 0;
     let gemme = 0;
     let gemmeDurantePartita = 0;
+    let timerCannoneSinistra;
+    let timerCannoneDestra;
+    let timerCannoneSpara;
     function cambioSezione() {
         while (padre.querySelector("*:not(.menu)")) {
-    padre.removeChild(padre.querySelector("*:not(.menu)"));
-    // console.log(padre.querySelector("*:not(.menu)"));
-}
+            padre.removeChild(padre.querySelector("*:not(.menu)"));
+            // console.log(padre.querySelector("*:not(.menu)"));
+        }
     }
     //record precedente di palle uccise o di tempo sopravvissuto
     function sezioneEndless() { //schermatasconfitta diventa schermata di avvio livello e questa sezione lo crea
@@ -123,28 +128,28 @@
         schermataGioco.style.width = window.innerWidth / 2 + "px";
         padre.appendChild(schermataGioco);
     }
-    function livelloSelezionato(event){
-        if(document.getElementById("livello1")==event.target){
+    function livelloSelezionato(event) {
+        if (document.getElementById("livello1") == event.target) {
             console.log("difficoltà 1");
         } else {
-            if(document.getElementById("livello2")==event.target){
-            console.log("difficoltà 2");
-        } else {
-            if(document.getElementById("livello3")==event.target){
-            console.log("difficoltà 3");
-        } else {
-            if(document.getElementById("livello4")==event.target){
-            console.log("difficoltà 4");
+            if (document.getElementById("livello2") == event.target) {
+                console.log("difficoltà 2");
+            } else {
+                if (document.getElementById("livello3") == event.target) {
+                    console.log("difficoltà 3");
+                } else {
+                    if (document.getElementById("livello4") == event.target) {
+                        console.log("difficoltà 4");
+                    }
+                }
             }
         }
-    }
-}
     }
     function startPartitaEndless() {
         cambioSezione();
         morte = false;
         padre.querySelector("nav").style.display = "none";
-        timerDurataPartita = window.setInterval(function(){gemmeDurantePartita++}, 10000);
+        timerDurataPartita = window.setInterval(function () { gemmeDurantePartita++ }, 10000);
         timerCreaPalle = window.setInterval(creaPalle, 2000);
         timerMuoviPalle = window.setInterval(muoviPalle, 1);
         document.addEventListener("keydown", tastoPremuto);
@@ -253,26 +258,58 @@
     }
     function tastoPremuto(event) {
         if (event.key === "ArrowLeft" || event.key === "A" || event.key === "a") {
-            if (cannone.x - passo >= 0) {
+            console.log(timerCannoneSinistra);
+            if (!timerCannoneSinistra) {
+            timerCannoneSinistra = window.setInterval(function(){if(cannone.x - passo >= 0){
                 cannone.x -= passo;
+                cannone.corpo.style.left = cannone.x + "px";
+            }}, 50);
             }
+            console.log(event.key);
         }
         if (event.key === "ArrowRight" || event.key === "D" || event.key === "d") {
-            if (cannone.x + passo <= window.innerWidth - dimensioniCannoneWidth) {
+            if (!timerCannoneDestra) {
+            timerCannoneDestra = window.setInterval(function(){if(cannone.x + passo <= window.innerWidth - dimensioniCannoneWidth){
                 cannone.x += passo;
+                cannone.corpo.style.left = cannone.x + "px";
+            }}, 50);
             }
+            console.log(event.key);
         }
         if (event.key === "ArrowUp" || event.key === "W" || event.key === "w") {
             creaProiettile();
             controllaCollisioni = true;
+            console.log(event.key);
         }
-        cannone.corpo.style.left = cannone.x + "px";
+        // cannone.corpo.style.left = cannone.x + "px";
     }
+
+
+
     function tastoRilasciato(event) {
+        if (event.key === "ArrowLeft" || event.key === "A" || event.key === "a") {
+            window.clearInterval(timerCannoneSinistra);
+            console.log(event.key);
+        }
+        if (event.key === "ArrowRight" || event.key === "D" || event.key === "d") {
+            window.clearInterval(timerCannoneDestra);
+            console.log(event.key);
+        }
         if (event.key === "ArrowUp" || event.key === "W" || event.key === "w") {
             timerSvuotaProiettili = window.setInterval(svuotaProiettili, 50)
         }
     }
+
+
+
+
+
+
+
+
+
+
+
     function svuotaProiettili() {
         if (listaProiettili.length == 0) {
             window.clearInterval(timerSvuotaProiettili);
@@ -283,7 +320,7 @@
     //cambiare dimensioni immagini con variabili
     function collisioniPallaCannone() {
         for (let i = 0; i < listaPalle.length; i++) {
-            if (listaPalle[i].y + dimensioniPalleHeight >= cannone.y+42) {//42 è l'altezza a cui corrisponde l'inizio del cannone sull'immagine attuale
+            if (listaPalle[i].y + dimensioniPalleHeight >= cannone.y + 42) {//42 è l'altezza a cui corrisponde l'inizio del cannone sull'immagine attuale
                 if ((listaPalle[i].x >= cannone.x && listaPalle[i].x <= cannone.x + dimensioniCannoneWidth) || (listaPalle[i].x + dimensioniPalleWidth >= cannone.x && listaPalle[i].x + dimensioniPalleWidth <= cannone.x + dimensioniCannoneWidth)) {
                     //hittato 
                     window.clearInterval(timerCreaPalle);
@@ -293,10 +330,10 @@
                     window.clearInterval(timerDurataPartita);
                     if (morte) { //senza la boolean si crea la schermataSconfitta 2 volte
                         schermataSconfitta();
-                        monete+=moneteDurantePartita;
-                        gemme+=gemmeDurantePartita;
-                        moneteDurantePartita=0;
-                        gemmeDurantePartita=0;
+                        monete += moneteDurantePartita;
+                        gemme += gemmeDurantePartita;
+                        moneteDurantePartita = 0;
+                        gemmeDurantePartita = 0;
                     }
                     morte = true;
                 }
@@ -350,7 +387,7 @@
                         padre.removeChild(listaPalle[j].corpo);
                         padre.removeChild(listaPalle[j].scritta);
                         listaPalle.splice(j, 1);
-                        moneteDurantePartita+=5;
+                        moneteDurantePartita += 5;
                     }
                 }
             }
@@ -400,11 +437,13 @@
         background-color: aqua;
         /* display: inline-block; */
     }
-    #centraLivelli{
+
+    #centraLivelli {
         display: flex;
         justify-content: space-evenly;
         padding-top: calc(50vh - 100px);
     }
+
     #livello1 {
         background-color: pink;
         width: 200PX;
@@ -413,6 +452,7 @@
         left: 10vw;
         top: calc(50vh - 100px); */
     }
+
     #livello2 {
         background-color: purple;
         width: 200PX;
@@ -421,6 +461,7 @@
         left: 30vw;
         top: calc(50vh - 100px); */
     }
+
     #livello3 {
         background-color: red;
         width: 200PX;
@@ -429,6 +470,7 @@
         left: 50vw;
         top: calc(50vh - 100px); */
     }
+
     #livello4 {
         background-color: black;
         width: 200PX;
@@ -451,4 +493,5 @@
     </div>
 
 </body>
+
 </html>
