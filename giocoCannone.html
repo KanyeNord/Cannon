@@ -8,7 +8,6 @@
 </head>
 <script>
     //principali:
-    //TODO: in corso: comandi per muoversi e problema con set interval
     //TODO: assegnare valori diversi alla quantità di palle, forse la loro velocità, e magari il tempo a disposizione per completare il livello in base al livello selezionato
     //TODO: se ci sono alcuni oggetti con classi e proprietà attribuite da javascript, mettere le proprietà su css
     //TODO: Inserire limite massimo di palle presenti su schermo
@@ -17,7 +16,6 @@
     //TODO: abbellire schermata sconfitta
     //TODO: creare sistema aggiunta monete e gemme per kill e in base al livello completato nella mode a livelli oppure in base al tempo rimasto, oppure fare i livelli con le vite e dare gemme in base alle vite rimanenti
     //TODO: fare uno sfondo
-    //TODO: fare in modo di poter premere più tasti alla volta senza scatti
     //FIXME: ottimizzare il controllo delle collisioni in modo da fare meno controlli
     //FIXME: se stai fermo alcune volte le palle non spawnano
     //BUG: fixare le scritte delle palle che si sovrappongono tra di loro (magari facendo un random che alla generazione delle scritte insierisce zindex alle palle e scritte di 1/2 o 3/4)
@@ -32,6 +30,7 @@
     //TODO: fare un'animazione di scomparsa del menu per renderlo più carino
     //TODO: migliorare hitbox cannone
     //BUG: ottimizzare i proiettili facendoli sparire se escono fuori dallo schermo MEGLIO
+    //TODO: se sei in una sezione non permettere di ricliccafe sulla sezione
 
     "use strict";
     let padre;
@@ -65,6 +64,9 @@
     let timerCannoneSinistra;
     let timerCannoneDestra;
     let timerCannoneSpara;
+    // let listaBarra = [];
+    // listaBarra.length=8;
+    // console.log(listaBarra);
     function cambioSezione() {
         while (padre.querySelector("*:not(.menu)")) {
             padre.removeChild(padre.querySelector("*:not(.menu)"));
@@ -75,7 +77,7 @@
     function sezioneEndless() { //schermatasconfitta diventa schermata di avvio livello e questa sezione lo crea
         cambioSezione();
         creaSchermata();
-        schermataGioco.innerHTML = "<h2>Endless Mode</h2> <span><p>Record: 531408 palle distrutte/tempo sopravvissuto <button>Gioca</button>";
+        schermataGioco.innerHTML = "<h2>Endless Mode</h2> <p>Record: 531408 palle distrutte/tempo sopravvissuto <button>Gioca</button>";
         schermataGioco.querySelector("button").addEventListener("click", startPartitaEndless); //mhh me puzza
     }
     function sezioneLivelli() {
@@ -130,20 +132,54 @@
     }
     function livelloSelezionato(event) {
         if (document.getElementById("livello1") == event.target) {
+            cambioSezione();//forse meglio non metterlo
+            creaSchermata();
+            schermataGioco.innerHTML = "<h2>Livello 1</h2> <p>Record: 5318 record tempo<button>Gioca</button><button>Indietro</button>";
+            schermataGioco.querySelectorAll("button")[0].addEventListener("click", startPartitaLivelli);
+            schermataGioco.querySelectorAll("button")[1].addEventListener("click", sezioneLivelli);//mhh me puzza
             console.log("difficoltà 1");
         } else {
             if (document.getElementById("livello2") == event.target) {
+                cambioSezione();//forse meglio non metterlo
+            creaSchermata();
+            schermataGioco.innerHTML = "<h2>Livello 2</h2> <p>Record: 5318 record tempo<button>Gioca</button><button>Indietro</button>";
+            schermataGioco.querySelectorAll("button")[0].addEventListener("click", startPartitaLivelli);
+            schermataGioco.querySelectorAll("button")[1].addEventListener("click", sezioneLivelli);//mhh me puzza
                 console.log("difficoltà 2");
             } else {
                 if (document.getElementById("livello3") == event.target) {
+                    cambioSezione();//forse meglio non metterlo
+            creaSchermata();
+            schermataGioco.innerHTML = "<h2>Livello 3</h2> <p>Record: 5318 record tempo<button>Gioca</button><button>Indietro</button>";
+            schermataGioco.querySelectorAll("button")[0].addEventListener("click", startPartitaLivelli);
+            schermataGioco.querySelectorAll("button")[1].addEventListener("click", sezioneLivelli);//mhh me puzza
                     console.log("difficoltà 3");
                 } else {
                     if (document.getElementById("livello4") == event.target) {
+                        cambioSezione();//forse meglio non metterlo
+            creaSchermata();
+            schermataGioco.innerHTML = "<h2>Livello 4</h2> <p>Record: 5318 record tempo<button>Gioca</button><button>Indietro</button>";
+            schermataGioco.querySelectorAll("button")[0].addEventListener("click", startPartitaLivelli);
+            schermataGioco.querySelectorAll("button")[1].addEventListener("click", sezioneLivelli);//mhh me puzza
                         console.log("difficoltà 4");
                     }
                 }
             }
         }
+    }
+    function startPartitaLivelli() {
+        cambioSezione();
+        morte = false;
+        padre.querySelector("nav").style.display = "none";
+        timerDurataPartita = window.setInterval(function () { gemmeDurantePartita++ }, 10000);
+        timerCreaPalle = window.setInterval(creaPalle, 2000);
+        timerMuoviPalle = window.setInterval(muoviPalle, 1);
+        document.addEventListener("keydown", tastoPremuto);
+        document.addEventListener("keyup", tastoRilasciato);
+        timerMuoviProiettili = window.setInterval(muoviProiettili, 1);
+        //scrivere personalizzazione
+        creaCannone();
+        padre.appendChild(cannone.corpo);
     }
     function startPartitaEndless() {
         cambioSezione();
@@ -240,7 +276,7 @@
         for (let i = 0; i < listaProiettili.length; i++) {
             listaProiettili[i].y -= 50;
             listaProiettili[i].corpo.style.top = listaProiettili[i].y + "px";
-            if (listaProiettili[i].y <= 0) {
+            if (listaProiettili[i].y < -dimensioniProiettiliHeight) {
                 padre.removeChild(listaProiettili[i].corpo);
                 listaProiettili.splice(i, 1);
             }
@@ -285,15 +321,15 @@
             console.log(event.key);
         }
         if (event.key === "ArrowUp" || event.key === "W" || event.key === "w") {
-            creaProiettile();
-            controllaCollisioni = true;
+            if (!timerCannoneSpara) {
+                timerCannoneSpara = window.setInterval(function(){
+                    creaProiettile();
+                    controllaCollisioni = true
+            }, 50);
+            }
             console.log(event.key);
         }
-        // cannone.corpo.style.left = cannone.x + "px";
     }
-
-
-
     function tastoRilasciato(event) {
         if (event.key === "ArrowLeft" || event.key === "A" || event.key === "a") {
             window.clearInterval(timerCannoneSinistra);
@@ -306,24 +342,14 @@
             console.log(event.key);
         }
         if (event.key === "ArrowUp" || event.key === "W" || event.key === "w") {
-            timerSvuotaProiettili = window.setInterval(svuotaProiettili, 50)
+            timerSvuotaProiettili = window.setInterval(svuotaProiettili, 50);
+            timerSvuotaProiettili = window.clearInterval(timerCannoneSpara, 50);
+            timerCannoneSpara=undefined;
         }
     }
-
-
-
-
-
-
-
-
-
-
-
     function svuotaProiettili() {
         if (listaProiettili.length == 0) {
             window.clearInterval(timerSvuotaProiettili);
-
             controllaCollisioni = false;
         }
     }
