@@ -13,7 +13,7 @@
     //FIXME: ottimizzare il controllo delle collisioni in modo da fare meno controlli
     //FIXME: se stai fermo alcune volte le palle non spawnano
     //BUG: fixare le scritte delle palle che si sovrappongono tra di loro (magari facendo un random che alla generazione delle scritte insierisce zindex alle palle e scritte di 1/2 o 3/4)
-    //FIXME: se tieni premuto lo sparaproiettili mentre muori quando ricominci il gioco i proiettili sparati sono immobili e da errore
+    //FIXME: se tieni premuto lo sparaproiettili mentre muori quando ricominci il gioco i proiettili sparati sono immobili e da errore(possibile risolutione con set timeout)
 
     //efficienza modifica programma:
     //TODO: se ci sono alcuni oggetti con classi e proprietà attribuite da javascript, mettere le proprietà su css
@@ -53,11 +53,10 @@
     let listaProiettili = [];
     let listaGrafichePalle = ["Palla1.png", "Palla2.png", "Palla3.png", "Palla4.png"];
     let timerCreaPalle;
-    let timerMuoviPalle;
-    let timerMuoviProiettili;
+    let timerMuoviPP;
     let timerSvuotaProiettili;
-    let timerDurataPartita;
-    let passo = 20; //minimo:20 | massimo: 150 
+    let timerGemme;
+    let passo = 100; //minimo:20 | massimo: 150 
     let cannone;
     let danno = 5; //minimo: 5 | massimo: decidere in base alla vita massima
     let controllaCollisioni = false;
@@ -73,7 +72,9 @@
     let vitaPalle = 500; //cambia
     let massimoPalle = 5; //cambia
     let timerAumentoDifficolta;
-    let timer = 0;
+    let timerDurataPartita;
+    let countDown = 10;
+    let contatore;
     // let listaBarra = [];
     // listaBarra.length=8;
     // console.log(listaBarra);
@@ -195,20 +196,30 @@
         cambioSezione();
         morte = false;
         padre.querySelector("nav").style.display = "none";
-        if(event.target.className == "partitaEndless"){
-            timerAumentoDifficolta = window.setInterval(aumentaDifficolta, 20000);
+        if (event.target.className == "partitaEndless") {
+            timerAumentoDifficolta = window.setInterval(aumentaDifficolta, 20000);//serve solo nella modalità endless
+        } else {
+            contatore = document.createElement("div");
+            contatore.innerText = countDown;
+            padre.appendChild(contatore);
+            timerDurataPartita = window.setInterval(function () {//serve solo nella modalità a livelli
+                countDown--;
+                contatore.innerText = countDown;
+                if (countDown == 0) {
+                    cambioSezione();
+                }
+            }, 1000);
         }
-        timerDurataPartita = window.setInterval(function () { gemmeDurantePartita++ }, 10000);
+        timerGemme = window.setInterval(function () { gemmeDurantePartita++ }, 10000);
         timerCreaPalle = window.setInterval(creaPalle, 3000);
-        timerMuoviPalle = window.setInterval(muoviPalle, 1);
         document.addEventListener("keydown", tastoPremuto);
         document.addEventListener("keyup", tastoRilasciato);
-        timerMuoviProiettili = window.setInterval(muoviProiettili, 1);
+        timerMuoviPP = window.setInterval(muoviPP, 1);
         //scrivere personalizzazione
         creaCannone();
         padre.appendChild(cannone.corpo);
     }
-    function aumentaDifficolta(){
+    function aumentaDifficolta() {
         massimoPalle += 1;
         vitaPalle += 200;
     }
@@ -220,7 +231,8 @@
         cannone.corpo.style.top = cannone.y + "px";
     }
     //creare oggetto palla che ha boolean delle direzioni, le coordinate, la propria immagine e quantità di vita
-    function muoviPalle() {
+    function muoviPP() {
+        //muovi Palle
         for (let i = 0; i < listaPalle.length; i++) {
             //muove la x(destra e sinistra) delle palle
             if (listaPalle[i].destra) {
@@ -258,6 +270,15 @@
             // console.log(listaPalle[i].y);
 
         }
+        //Muovi Proiettili
+        for (let i = 0; i < listaProiettili.length; i++) {
+            listaProiettili[i].y -= 50;
+            listaProiettili[i].corpo.style.top = listaProiettili[i].y + "px";
+            if (listaProiettili[i].y < -dimensioniProiettiliHeight) {
+                padre.removeChild(listaProiettili[i].corpo);
+                listaProiettili.splice(i, 1);
+            }
+        }
     }
     function creaPalle() {
         if (listaPalle.length < massimoPalle) {
@@ -290,19 +311,8 @@
             // window.clearInterval(timerMuoviPalle);
         }
     }
-
-    function muoviProiettili() {
-        for (let i = 0; i < listaProiettili.length; i++) {
-            listaProiettili[i].y -= 50;
-            listaProiettili[i].corpo.style.top = listaProiettili[i].y + "px";
-            if (listaProiettili[i].y < -dimensioniProiettiliHeight) {
-                padre.removeChild(listaProiettili[i].corpo);
-                listaProiettili.splice(i, 1);
-            }
-        }
-    }
     function creaProiettile() {
-        if (morte == false) {
+        if(!morte){
             let proiettile = { y: cannone.y - dimensioniProiettiliHeight, x: cannone.x, corpo: document.createElement("img") };
             proiettile.corpo.src = "Proiettile.png";
             listaProiettili.push(proiettile);
@@ -382,25 +392,30 @@
             if (listaPalle[i].y + dimensioniPalleHeight >= cannone.y + 42) {//42 è l'altezza a cui corrisponde l'inizio del cannone sull'immagine attuale
                 if ((listaPalle[i].x >= cannone.x && listaPalle[i].x <= cannone.x + dimensioniCannoneWidth) || (listaPalle[i].x + dimensioniPalleWidth >= cannone.x && listaPalle[i].x + dimensioniPalleWidth <= cannone.x + dimensioniCannoneWidth)) {
                     //hittato 
-                    window.clearInterval(timerCreaPalle);
-                    window.clearInterval(timerMuoviPalle);
-                    window.clearInterval(timerMuoviProiettili);
-                    window.clearInterval(timerSvuotaProiettili);
-                    window.clearInterval(timerDurataPartita);
-                    window.clearInterval(timerAumentoDifficolta);
-                    if (morte) { //senza la boolean si crea la schermataSconfitta 2 volte
-                        schermataSconfitta();
-                        massimoPalle = 3;
-                        vitaPalle = 200;
-                        monete += moneteDurantePartita;
-                        gemme += gemmeDurantePartita;
-                        moneteDurantePartita = 0;
-                        gemmeDurantePartita = 0;
-                    }
                     morte = true;
+                    sconfitta();
+
                 }
             }
         }
+    }
+    function sconfitta() {
+        window.clearInterval(timerCreaPalle);
+        window.clearInterval(timerMuoviPP);
+        window.clearInterval(timerSvuotaProiettili);
+        window.clearInterval(timerGemme);
+        window.clearInterval(timerAumentoDifficolta);
+        window.clearInterval(timerDurataPartita);
+        // if (morte) { //senza la boolean si crea la schermataSconfitta 2 volte
+        schermataSconfitta();
+        massimoPalle = 3;
+        vitaPalle = 200;
+        monete += moneteDurantePartita;
+        gemme += gemmeDurantePartita;
+        moneteDurantePartita = 0;
+        gemmeDurantePartita = 0;
+        // }
+        // morte = true;
     }
     function schermataSconfitta() {
         creaSchermata();
