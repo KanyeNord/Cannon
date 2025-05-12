@@ -207,6 +207,7 @@
                 contatore.innerText = countDown;
                 if (countDown == 0) {
                     cambioSezione();
+                    sconfitta();
                 }
             }, 1000);
         }
@@ -312,7 +313,7 @@
         }
     }
     function creaProiettile() {
-        if(!morte){
+        if (!morte) {
             let proiettile = { y: cannone.y - dimensioniProiettiliHeight, x: cannone.x, corpo: document.createElement("img") };
             proiettile.corpo.src = "Proiettile.png";
             listaProiettili.push(proiettile);
@@ -322,45 +323,47 @@
         }
     }
     function tastoPremuto(event) {
-        if (event.key === "ArrowLeft" || event.key === "A" || event.key === "a") {
-            console.log(timerCannoneSinistra);
-            if (!timerCannoneSinistra) {
-                if (timerCannoneDestra) {
-                    window.clearInterval(timerCannoneDestra);
-                    timerCannoneDestra = undefined;
-                }
-                timerCannoneSinistra = window.setInterval(function () {
-                    if (cannone.x - passo >= 0) {
-                        cannone.x -= passo;
-                        cannone.corpo.style.left = cannone.x + "px";
+        if (!morte) {
+            if (event.key === "ArrowLeft" || event.key === "A" || event.key === "a") {
+                console.log(timerCannoneSinistra);
+                if (!timerCannoneSinistra) {
+                    if (timerCannoneDestra) {
+                        window.clearInterval(timerCannoneDestra);
+                        timerCannoneDestra = undefined;
                     }
-                }, 50);
-            }
-            console.log(event.key);
-        }
-        if (event.key === "ArrowRight" || event.key === "D" || event.key === "d") {
-            if (!timerCannoneDestra) {
-                if (timerCannoneSinistra) {
-                    window.clearInterval(timerCannoneSinistra);
-                    timerCannoneSinistra = undefined;
+                    timerCannoneSinistra = window.setInterval(function () {
+                        if (cannone.x - passo >= 0) {
+                            cannone.x -= passo;
+                            cannone.corpo.style.left = cannone.x + "px";
+                        }
+                    }, 50);
                 }
-                timerCannoneDestra = window.setInterval(function () {
-                    if (cannone.x + passo <= window.innerWidth - dimensioniCannoneWidth) {
-                        cannone.x += passo;
-                        cannone.corpo.style.left = cannone.x + "px";
+                console.log(event.key);
+            }
+            if (event.key === "ArrowRight" || event.key === "D" || event.key === "d") {
+                if (!timerCannoneDestra) {
+                    if (timerCannoneSinistra) {
+                        window.clearInterval(timerCannoneSinistra);
+                        timerCannoneSinistra = undefined;
                     }
-                }, 50);
+                    timerCannoneDestra = window.setInterval(function () {
+                        if (cannone.x + passo <= window.innerWidth - dimensioniCannoneWidth) {
+                            cannone.x += passo;
+                            cannone.corpo.style.left = cannone.x + "px";
+                        }
+                    }, 50);
+                }
+                console.log(event.key);
             }
-            console.log(event.key);
-        }
-        if (event.key === "ArrowUp" || event.key === "W" || event.key === "w") {
-            if (!timerCannoneSpara) {
-                timerCannoneSpara = window.setInterval(function () {
-                    creaProiettile();
-                    controllaCollisioni = true
-                }, 50);
+            if (event.key === "ArrowUp" || event.key === "W" || event.key === "w") {
+                if (!timerCannoneSpara) {
+                    timerCannoneSpara = window.setInterval(function () {
+                        creaProiettile();
+                        controllaCollisioni = true
+                    }, 50);
+                }
+                console.log(event.key);
             }
-            console.log(event.key);
         }
     }
     function tastoRilasciato(event) {
@@ -376,7 +379,7 @@
         }
         if (event.key === "ArrowUp" || event.key === "W" || event.key === "w") {
             timerSvuotaProiettili = window.setInterval(svuotaProiettili, 50);
-            timerSvuotaProiettili = window.clearInterval(timerCannoneSpara, 50);
+            window.clearInterval(timerCannoneSpara);
             timerCannoneSpara = undefined;
         }
     }
