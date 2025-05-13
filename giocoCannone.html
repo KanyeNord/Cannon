@@ -21,7 +21,6 @@
     //TODO: se ci sono alcuni oggetti con classi e proprietà attribuite da javascript, mettere le proprietà su css
     //TODO: fare cose con le classi e id per rendere tutto più pulito
     //TODO: sistemare l'interfaccia e mettere le cose dove devono stare
-    //TODO: forse cancellare il div iniziale in quanto uguale al body
     //TODO: sostituire i bottoni immagini con dei button per poterli premere con tab
 
     //estetica:
@@ -434,8 +433,8 @@
                 console.log(event.key);
             }
         }
-        if(event.key === " "){
-            if(barraSuperiore.style.display == "flex"){
+        if (event.key === " ") {
+            if (barraSuperiore.style.display == "flex") {
                 barraSuperiore.style.display = "none";
             } else {
                 barraSuperiore.style.display = "flex";
@@ -529,26 +528,25 @@
 
 
 
-                if ((listaProiettili[i].x >= listaPalle[j].x && listaProiettili[i].x <= listaPalle[j].x + dimensioniPalleWidth)
+                if (((listaProiettili[i].x >= listaPalle[j].x && listaProiettili[i].x <= listaPalle[j].x + dimensioniPalleWidth)
                     ||
-                    (listaProiettili[i].x + dimensioniProiettiliWidth >= listaPalle[j].x && listaProiettili[i].x + dimensioniProiettiliWidth <= listaPalle[j].x + dimensioniPalleWidth)) {
-                    if (
-                        ((listaProiettili[i].y >= listaPalle[j].y && listaProiettili[i].y <= listaPalle[j].y + dimensioniPalleHeight)
-                            ||
-                            (listaProiettili[i].y + dimensioniProiettiliHeight >= listaPalle[j].y && listaProiettili[i].y + dimensioniProiettiliHeight <= listaPalle[j].y + dimensioniPalleHeight))) {
-                        //hittato
-                        // window.clearInterval(timerMuoviProiettili);
-                        // window.clearInterval(timerMuoviPalle);
-                        padre.removeChild(listaProiettili[i].corpo);
-                        listaProiettili.splice(i, 1);
-                        listaPalle[j].vita -= danno;
-                        listaPalle[j].scritta.innerText = listaPalle[j].vita;
-                        if (listaPalle[j].vita <= 0) {
-                            padre.removeChild(listaPalle[j].corpo);
-                            padre.removeChild(listaPalle[j].scritta);
-                            listaPalle.splice(j, 1);
-                            moneteDurantePartita += 5;
-                        }
+                    (listaProiettili[i].x + dimensioniProiettiliWidth >= listaPalle[j].x && listaProiettili[i].x + dimensioniProiettiliWidth <= listaPalle[j].x + dimensioniPalleWidth))
+                    &&
+                    ((listaProiettili[i].y >= listaPalle[j].y && listaProiettili[i].y <= listaPalle[j].y + dimensioniPalleHeight)
+                        ||
+                        (listaProiettili[i].y + dimensioniProiettiliHeight >= listaPalle[j].y && listaProiettili[i].y + dimensioniProiettiliHeight <= listaPalle[j].y + dimensioniPalleHeight))) {
+                    //hittato
+                    // window.clearInterval(timerMuoviProiettili);
+                    // window.clearInterval(timerMuoviPalle);
+                    padre.removeChild(listaProiettili[i].corpo);
+                    listaProiettili.splice(i, 1);
+                    listaPalle[j].vita -= danno;
+                    listaPalle[j].scritta.innerText = listaPalle[j].vita;
+                    if (listaPalle[j].vita <= 0) {
+                        padre.removeChild(listaPalle[j].corpo);
+                        padre.removeChild(listaPalle[j].scritta);
+                        listaPalle.splice(j, 1);
+                        moneteDurantePartita += 5;
                     }
                 }
             }
@@ -657,10 +655,11 @@
         position: absolute;
         left: 100%;
     } */
-    img.barra{
+    img.barra {
         height: 100px;
         width: 100px;
     }
+
     #barra {
         background-color: rgba(0, 0, 0, 0.5);
         display: flex;
