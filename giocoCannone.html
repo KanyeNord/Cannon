@@ -8,7 +8,6 @@
 </head>
 <script>
     //principali:
-    //TODO: quando finisce la partita il contatore scompare
     //TODO: decidere se fare impostazioni che fermano il gioco (rischioso) in caso sostituire l'ingranaggio con il tasto per azzerare il volume
     //TODO: modificare la velocità della palla in base al livello e con il tempo in endless mode
     //TODO: modificare il tempo a disposizione per completare il livello in base al livello selezionato
@@ -86,9 +85,14 @@
     let massimoPalle = 5; //cambia
     let timerAumentoDifficolta;
     let timerDurataPartita;
-    let countDown;
-
+    let countdown;
     let modalita;
+    let recordEndless=0;
+    let recordLivello1=0;
+    let recordLivello2=0;
+    let recordLivello3=0;
+    let recordLivello4=0;
+    let punteggioAttuale=0;
     // let listaBarra = [];
     // listaBarra.length=8;
     // console.log(listaBarra);
@@ -96,7 +100,6 @@
         while (padre.querySelector("*:not(.menu):not(.barra)")) {
             console.log(padre.querySelector("*:not(.menu):not(.barra)"));
             padre.removeChild(padre.querySelector("*:not(.menu):not(.barra)"));
-
         }
     }
     //sezione endless non presente perchè integrata in livello selezionato
@@ -157,7 +160,7 @@
         if (document.getElementById("endless") == event.target || (modalita == "endless" && event.target.innerText == "riprova")) {
             massimoPalle = 3;
             vitaPalle = 200;
-            countDown = 0;
+            countdown = 0;
             if (document.getElementById("endless") == event.target) {
                 modalita = "";
             }
@@ -168,7 +171,7 @@
                 schermataGioco.querySelector("button").addEventListener("click", startPartita)//mhh me puzza
             } else {
                 startPartita();
-                barraSuperiore.querySelector("div").innerText = countDown;
+                barraSuperiore.querySelector("div").innerText = countdown;
             }
             modalita = "endless";
             console.log("difficoltà endless");
@@ -176,7 +179,7 @@
             if (document.getElementById("livello1") == event.target || (modalita == "livello1" && event.target.innerText == "riprova")) {
                 massimoPalle = 3;
                 vitaPalle = 200;
-                countDown = 10;
+                countdown = 100;
                 if (document.getElementById("livello1") == event.target) {
                     modalita = "";
                 }
@@ -188,7 +191,7 @@
                     schermataGioco.querySelectorAll("button")[1].addEventListener("click", sezioneLivelli);//mhh me puzza
                 } else {
                     startPartita();
-                    barraSuperiore.querySelector("div").innerText = countDown;
+                    barraSuperiore.querySelector("div").innerText = countdown;
                 }
                 modalita = "livello1";
                 console.log("difficoltà 1");
@@ -196,7 +199,7 @@
                 if (document.getElementById("livello2") == event.target || (modalita == "livello2" && event.target.innerText == "riprova")) {
                     massimoPalle = 5;
                     vitaPalle = 500;
-                    countDown = 10;
+                    countdown = 80;
                     if (document.getElementById("livello2") == event.target) {
                         modalita = "";
                     }
@@ -208,7 +211,7 @@
                         schermataGioco.querySelectorAll("button")[1].addEventListener("click", sezioneLivelli);//mhh me puzza
                     } else {
                         startPartita();
-                        barraSuperiore.querySelector("div").innerText = countDown;
+                        barraSuperiore.querySelector("div").innerText = countdown;
                     }
                     modalita = "livello2";
                     console.log("difficoltà 2");
@@ -216,7 +219,7 @@
                     if (document.getElementById("livello3") == event.target || (modalita == "livello3" && event.target.innerText == "riprova")) {
                         massimoPalle = 7;
                         vitaPalle = 1000;
-                        countDown = 10;
+                        countdown = 70;
                         if (document.getElementById("livello3") == event.target) {
                             modalita = "";
                         }
@@ -228,7 +231,7 @@
                             schermataGioco.querySelectorAll("button")[1].addEventListener("click", sezioneLivelli);//mhh me puzza
                         } else {
                             startPartita();
-                            barraSuperiore.querySelector("div").innerText = countDown;
+                            barraSuperiore.querySelector("div").innerText = countdown;
                         }
                         modalita = "livello3";
                         console.log("difficoltà 3");
@@ -236,7 +239,7 @@
                         if (document.getElementById("livello4") == event.target || (modalita == "livello4" && event.target.innerText == "riprova")) {
                             massimoPalle = 10;
                             vitaPalle = 2000;
-                            countDown = 10;
+                            countdown = 40;
                             if (document.getElementById("livello4") == event.target) {
                                 modalita = "";
                             }
@@ -248,7 +251,7 @@
                                 schermataGioco.querySelectorAll("button")[1].addEventListener("click", sezioneLivelli);//mhh me puzza
                             } else {
                                 startPartita();
-                                barraSuperiore.querySelector("div").innerText = countDown;
+                                barraSuperiore.querySelector("div").innerText = countdown;
                             }
                             modalita = "livello4";
                             console.log("difficoltà 4");
@@ -263,18 +266,18 @@
         morte = false;
         console.log(padre.querySelector("nav"));
         padre.querySelector("nav").style.display = "none";
-        barraSuperiore.querySelector("div").innerText = countDown;
+        barraSuperiore.querySelector("div").innerText = countdown;
         if (modalita == "endless") {
             timerAumentoDifficolta = window.setInterval(aumentaDifficolta, 20000);//serve solo nella modalità endless
             timerDurataPartita = window.setInterval(function () {//serve solo nella modalità a livelli
-                countDown++;
-                barraSuperiore.querySelector("div").innerText = countDown;
+                countdown++;
+                barraSuperiore.querySelector("div").innerText = countdown;
             }, 1000);
         } else {
             timerDurataPartita = window.setInterval(function () {//serve solo nella modalità a livelli
-                countDown--;
-                barraSuperiore.querySelector("div").innerText = countDown;
-                if (countDown == 0) {
+                countdown--;
+                barraSuperiore.querySelector("div").innerText = countdown;
+                if (countdown == 0) {
                     morte = true;
                     sconfitta();
                 }
@@ -498,7 +501,39 @@
         padre.removeChild(cannone.corpo);
         padre.querySelector("nav").style.display = "";
 
+        punteggioAttuale = countdown;
+        barraSuperiore.querySelector("div").innerText = "";
 
+        console.log("inizio test interessato");
+        console.log(typeof(punteggioAttuale));
+        console.log(punteggioAttuale);
+        console.log(recordEndless);
+
+        // parseInt(punteggioAttuale)
+        console.log(punteggioAttuale > recordEndless);
+        console.log(modalita == "endless");
+        console.log(modalita == "endless" && punteggioAttuale > recordEndless);
+
+
+        if (modalita == "endless" && punteggioAttuale > recordEndless) {
+            recordEndless = punteggioAttuale;
+        } else {
+            if (modalita == "livello1" && punteggioAttuale > recordLivello1) {
+                recordLivello1 = punteggioAttuale;
+            } else {
+                if (modalita == "livello2" && punteggioAttuale > recordLivello2) {
+                    recordLivello2 = punteggioAttuale;
+                } else {
+                    if (modalita == "livello3" && punteggioAttuale > recordLivello3) {
+                        recordLivello3 = punteggioAttuale;
+                    } else {
+                        if (modalita == "livello4" && punteggioAttuale > recordLivello4) {
+                            recordLivello4 = punteggioAttuale;
+                        }
+                    }
+                }
+            }
+        }
 
         schermataSconfitta();
         massimoPalle = 3;
@@ -512,8 +547,13 @@
     }
     function schermataSconfitta() {
         creaSchermata();
-        schermataGioco.innerHTML = "<h2> Hai perso!</h2> <span><p>monete ottenute: " + moneteDurantePartita + "</p><p>gemme ottenute: " + gemmeDurantePartita + "</p></span> <button>riprova</button>";
-        schermataGioco.querySelector("button").addEventListener("click", livelloSelezionato); //mhh me puzza
+        if (modalita == "endless") {
+            schermataGioco.innerHTML = "<h2> Hai perso!</h2> <span><p>monete ottenute: " + moneteDurantePartita + "</p><p>gemme ottenute: " + gemmeDurantePartita + "</p><p>punteggio:" + punteggioAttuale + "</p><p>record:" + recordEndless + "</p></span> <button>riprova</button>";
+            schermataGioco.querySelector("button").addEventListener("click", livelloSelezionato); //mhh me puzza
+        } else {
+            schermataGioco.innerHTML = "<h2> Hai perso!</h2> <span><p>monete ottenute: " + moneteDurantePartita + "</p><p>gemme ottenute: " + gemmeDurantePartita + "</p></span> <button>riprova</button>";
+            schermataGioco.querySelector("button").addEventListener("click", livelloSelezionato); //mhh me puzza
+        }
     }
     function collisioniProiettilePalla() {
         for (let j = 0; j < listaPalle.length; j++) {
@@ -595,7 +635,7 @@
     #centraLivelli {
         display: flex;
         justify-content: space-evenly;
-        padding-top: calc(50vh - 100px);
+        padding-top: 25vh;
     }
 
     #livello1 {
