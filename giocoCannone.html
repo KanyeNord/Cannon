@@ -8,12 +8,9 @@
 </head>
 <script>
     //principali:
-    //TODO: decidere se fare impostazioni che fermano il gioco (rischioso) in caso sostituire l'ingranaggio con il tasto per azzerare il volume
-    //TODO: modificare la velocità della palla in base al livello e con il tempo in endless mode
+    //continuare sezioneNegozio
     //TODO: modificare il tempo a disposizione per completare il livello in base al livello selezionato
-    //TODO: creare sistema aggiunta monete e gemme per kill e in base al livello completato nella mode a livelli oppure in base al tempo rimasto, oppure fare i livelli con le vite e dare gemme in base alle vite rimanenti
     //FIXME: ottimizzare il controllo delle collisioni in modo da fare meno controlli(Spatial Partitioning)
-    //FIXME: se stai fermo alcune volte le palle non spawnano(probabilmente fixato)
     //BUG: fixare le scritte delle palle che si sovrappongono tra di loro (magari facendo un random che alla generazione delle scritte insierisce zindex alle palle e scritte di 1/2 o 3/4)
 
     //efficienza modifica programma:
@@ -29,31 +26,25 @@
 
     //opzionali:
     //TODO: barra di riempimento di fine livello
-    //TODO: modalità con rimbalzi random
     //TODO: migliorare fisica palle facendo sembrare che rimbalzino
     //TODO: migliorare fisica delle palle impostando un'altezza a cui tornano giù
     //TODO: se sei in una sezione non permettere di ricliccare sulla sezione
-
-
+    //TODO: rendere il programma funzionante anche con schermo rimpicciolito
 
     //A ogni livello deve aumentare la vita delle palle, e il massimo di palle su schermo
     //In Endless mode la vita e il massimo di palle su schermo delle palle aumenta con il tempo
     "use strict";
     let padre;
     let barraSuperiore;
+    let playerMusicaBackground;
+    let musicaSbloccata = false;
     function onload() {
         padre = document.getElementsByTagName("body")[0]//.querySelector("div");
         barraSuperiore = document.getElementById("barra");
         document.addEventListener("keydown", tastoPremuto);
         document.addEventListener("keyup", tastoRilasciato);
-        // contatore.className= "barraInformazioni";
-        // contenitoreMonete.className= "barraInformazioni";
-        // contenitoreGemme.className= "barraInformazioni";
-        // impostazioni.className= "barraInformazioni";
-        // barraSuperiore.appendChild(contatore);
-        // barraSuperiore.appendChild(contenitoreMonete);
-        // barraSuperiore.appendChild(contenitoreGemme);
-        // barraSuperiore.appendChild(impostazioni);
+        playerMusicaBackground = document.getElementById("musicaBackground");
+        // document.addEventListener("click", function () { playerMusicaBackground.paused && playerMusicaBackground.currentTime == 0 ? playerMusicaBackground.play() : null; musicaSbloccata = true });
     }
     let dimensioniCannoneWidth = 200;
     let dimensioniCannoneHeight = 200;
@@ -70,9 +61,9 @@
     let timerGemme;
     let passo = 100; //minimo:20 | massimo: 150 
     let cannone;
-    let danno = 5; //minimo: 5 | massimo: decidere in base alla vita massima
+    let danno = 5; //minimo: 5 | massimo: 25
     let controllaCollisioni = false;
-    let morte = false;
+    let fuoriPartita = true; //true all'inizio in modo da evitare che keydown si attivi prima che il cannone sia stato creato
     let schermataGioco;
     let monete = 0;
     let moneteDurantePartita = 0;
@@ -87,19 +78,22 @@
     let timerDurataPartita;
     let countdown;
     let modalita;
-    let recordEndless=0;
-    let recordLivello1=0;
-    let recordLivello2=0;
-    let recordLivello3=0;
-    let recordLivello4=0;
-    let punteggioAttuale=0;
+    let recordEndless = 0;
+    let recordLivello1 = 0;
+    let recordLivello2 = 0;
+    let recordLivello3 = 0;
+    let recordLivello4 = 0;
+    let punteggioAttuale = 0;
+    let kill = 0;
+    let obbiettivoKill;
+
     // let listaBarra = [];
     // listaBarra.length=8;
     // console.log(listaBarra);
     function cambioSezione() {
-        while (padre.querySelector("*:not(.menu):not(.barra)")) {
-            console.log(padre.querySelector("*:not(.menu):not(.barra)"));
-            padre.removeChild(padre.querySelector("*:not(.menu):not(.barra)"));
+        while (padre.querySelector("*:not(.menu):not(.barra):not(#musicaBackground)")) {
+            console.log(padre.querySelector("*:not(.menu):not(.barra):not(#musicaBackground)"));
+            padre.removeChild(padre.querySelector("*:not(.menu):not(.barra):not(#musicaBackground)"));
         }
     }
     //sezione endless non presente perchè integrata in livello selezionato
@@ -135,12 +129,123 @@
     }
     function sezioneNegozio() {
         cambioSezione();
+        let contenitoreNegozio = document.createElement("div");
+        padre.appendChild(contenitoreNegozio);
+        let sezionePotenziamenti = document.createElement("img");
+        let sezionePoteri = document.createElement("img");
+        let sezioneTemi = document.createElement("img");
+
+        let potenziaVelocita = document.createElement("img");
+        let potenziaDanno = document.createElement("img");
+
+        let potereDannoDoppio = document.createElement("img");
+        let potereInvisibile = document.createElement("img");
+
+        let temaNatura = document.createElement("img");
+        let temaCandyland = document.createElement("img");
+        let temaGalaxy = document.createElement("img");
+        let temaOG = document.createElement("img");
+
+        let indietro = document.createElement("img");
+
+        let immagini = [
+            sezionePotenziamenti,
+            sezionePoteri,
+            sezioneTemi,
+            potenziaVelocita,
+            potenziaDanno,
+            potereDannoDoppio,
+            potereInvisibile,
+            temaNatura,
+            temaCandyland,
+            temaGalaxy,
+            temaOG,
+        ];
+
+        indietro.src = "cogwheel.png";
+        indietro.id = "indietro";
+
+        contenitoreNegozio.className = "negozio";
+
+        // Aggiungo la stessa classe a tutti gli elementi
+        immagini.forEach(img => {
+            img.className = "negozio";
+            img.src = "Coez.PNG";
+        });
+
+        // sezionePotenziamenti.id = "livello1";
+        // livello2.id = "livello2";
+        // livello3.id = "livello3";
+
+        // livello1.id = "livello1";
+        // livello2.id = "livello2";
+
+        // livello3.id = "livello3";
+        // livello4.id = "livello4";
+
+        // livello1.id = "livello1";
+        // livello2.id = "livello2";
+        // livello3.id = "livello3";
+        // livello4.id = "livello4";
+
+        sezionePotenziamenti.addEventListener("click", function () {
+            contenitoreNegozio.removeChild(sezionePotenziamenti);
+            contenitoreNegozio.removeChild(sezionePoteri);
+            contenitoreNegozio.removeChild(sezioneTemi);
+
+            potenziaVelocita.addEventListener("click", negozio);
+            potenziaDanno.addEventListener("click", negozio);
+            indietro.addEventListener("click", negozio);
+
+            contenitoreNegozio.appendChild(potenziaVelocita);
+            contenitoreNegozio.appendChild(potenziaDanno);
+            contenitoreNegozio.appendChild(indietro);
+        });
+        sezionePoteri.addEventListener("click", function () {
+            contenitoreNegozio.removeChild(sezionePotenziamenti);
+            contenitoreNegozio.removeChild(sezionePoteri);
+            contenitoreNegozio.removeChild(sezioneTemi);
+
+            potereDannoDoppio.addEventListener("click", negozio);
+            potereInvisibile.addEventListener("click", negozio);
+            indietro.addEventListener("click", negozio);
+
+            contenitoreNegozio.appendChild(potereDannoDoppio);
+            contenitoreNegozio.appendChild(potereInvisibile);
+            contenitoreNegozio.appendChild(indietro);
+        });
+        sezioneTemi.addEventListener("click", function () {
+            contenitoreNegozio.removeChild(sezionePotenziamenti);
+            contenitoreNegozio.removeChild(sezionePoteri);
+            contenitoreNegozio.removeChild(sezioneTemi);
+
+            temaNatura.addEventListener("click", negozio);
+            temaCandyland.addEventListener("click", negozio);
+            temaGalaxy.addEventListener("click", negozio);
+            temaOG.addEventListener("click", negozio);
+            indietro.addEventListener("click", negozio);
+
+            contenitoreNegozio.appendChild(temaNatura);
+            contenitoreNegozio.appendChild(temaCandyland);
+            contenitoreNegozio.appendChild(temaGalaxy);
+            contenitoreNegozio.appendChild(temaOG);
+            contenitoreNegozio.appendChild(indietro);
+        });
+        contenitoreNegozio.appendChild(sezionePotenziamenti);
+        contenitoreNegozio.appendChild(sezionePoteri);
+        contenitoreNegozio.appendChild(sezioneTemi);
+        
     }
     function sezioneGuardaroba() {
         cambioSezione();
     }
     function sezioneImpostazioni() {
         cambioSezione();
+    }
+    function negozio(event){
+        if(event.target.id == "indietro"){
+            sezioneNegozio();
+        }
     }
     function creaSchermata() {
         schermataGioco = document.createElement("div");
@@ -180,6 +285,7 @@
                 massimoPalle = 3;
                 vitaPalle = 200;
                 countdown = 100;
+                obbiettivoKill = 10;
                 if (document.getElementById("livello1") == event.target) {
                     modalita = "";
                 }
@@ -200,6 +306,7 @@
                     massimoPalle = 5;
                     vitaPalle = 500;
                     countdown = 80;
+                    obbiettivoKill = 10;
                     if (document.getElementById("livello2") == event.target) {
                         modalita = "";
                     }
@@ -220,6 +327,7 @@
                         massimoPalle = 7;
                         vitaPalle = 1000;
                         countdown = 70;
+                        obbiettivoKill = 15;
                         if (document.getElementById("livello3") == event.target) {
                             modalita = "";
                         }
@@ -239,7 +347,8 @@
                         if (document.getElementById("livello4") == event.target || (modalita == "livello4" && event.target.innerText == "riprova")) {
                             massimoPalle = 10;
                             vitaPalle = 2000;
-                            countdown = 40;
+                            countdown = 100;
+                            obbiettivoKill = 20;
                             if (document.getElementById("livello4") == event.target) {
                                 modalita = "";
                             }
@@ -263,7 +372,7 @@
     }
     function startPartita(event) {
         cambioSezione();
-        morte = false;
+        fuoriPartita = false;
         console.log(padre.querySelector("nav"));
         padre.querySelector("nav").style.display = "none";
         barraSuperiore.querySelector("div").innerText = countdown;
@@ -278,7 +387,7 @@
                 countdown--;
                 barraSuperiore.querySelector("div").innerText = countdown;
                 if (countdown == 0) {
-                    morte = true;
+                    fuoriPartita = true;
                     sconfitta();
                 }
             }, 1000);
@@ -301,45 +410,53 @@
         cannone.corpo.style.left = cannone.x + "px";
         cannone.corpo.style.top = cannone.y + "px";
     }
-    //creare oggetto palla che ha boolean delle direzioni, le coordinate, la propria immagine e quantità di vita
     function muoviPP() {
         //muovi Palle
         for (let i = 0; i < listaPalle.length; i++) {
             //muove la x(destra e sinistra) delle palle
             if (listaPalle[i].destra) {
-                listaPalle[i].x++;
+                listaPalle[i].x += listaPalle[i].curvaturaX;
             } else {
-                listaPalle[i].x--;
+                listaPalle[i].x -= listaPalle[i].curvaturaX;
+            }
+            if (listaPalle[i].cambioCurvatura) {
+                listaPalle[i].curvaturaX = Math.random() * 4 + 1;
+                // listaPalle[i].curvaturaY = Math.random() * 4 + 1;
+                listaPalle[i].cambioCurvatura = false;
             }
             if (listaPalle[i].x + dimensioniPalleWidth >= window.innerWidth || listaPalle[i].x <= 0) {
                 listaPalle[i].destra = !listaPalle[i].destra;
+                listaPalle[i].cambioCurvatura = true;
             }
             //muove la y(su e giu) delle palle
             if (listaPalle[i].su) {
-                listaPalle[i].y--;
+                listaPalle[i].y -= listaPalle[i].curvaturaY;
             } else {
-                listaPalle[i].y++;
+                listaPalle[i].y += listaPalle[i].curvaturaY;
+            }
+            if (listaPalle[i].cambioCurvatura) {
+                // listaPalle[i].curvaturaX = Math.random() * 4 + 1;
+                listaPalle[i].curvaturaY = Math.random() * 4 + 1;
+                listaPalle[i].cambioCurvatura = false;
             }
             if (listaPalle[i].y + dimensioniPalleHeight >= window.innerHeight || listaPalle[i].y <= 0) {
                 listaPalle[i].su = !listaPalle[i].su;
+                listaPalle[i].cambioCurvatura = true;
             }
             // aggiunge i valori modificati negli oggetti alle proprietà css delle immagini
             listaPalle[i].corpo.style.left = listaPalle[i].x + "px";
             listaPalle[i].scritta.style.left = listaPalle[i].x + "px";
             listaPalle[i].corpo.style.top = listaPalle[i].y + "px";
             listaPalle[i].scritta.style.top = listaPalle[i].y + "px";
-
-            collisioniPallaCannone();
-
-            if (controllaCollisioni) {
-                collisioniProiettilePalla();
-            }
-
             // console.log(listaPalle[i].destra);
             // console.log(listaPalle[i].x);
             // console.log(listaPalle[i].su);
             // console.log(listaPalle[i].y);
 
+        }
+        collisioniPallaCannone();
+        if (controllaCollisioni) {
+            collisioniProiettilePalla();
         }
         //Muovi Proiettili
         for (let i = 0; i < listaProiettili.length; i++) {
@@ -356,6 +473,9 @@
         if (listaPalle.length < massimoPalle) {
             let palla = {
                 destra: Math.random() > 0.5 ? true : false,
+                curvaturaX: Math.random() * 4 + 1,
+                curvaturaY: Math.random() * 4 + 1,
+                cambioCurvatura: false,
                 su: false, //se la palla deve cadere oppure se rimbalza in su 
                 y: 0, //all'inizio è uguale a yMax
                 yMax: 0, //fissa oppure che cambia ogni volta ma non cambia in game, massima altezza rimbalzo
@@ -384,7 +504,7 @@
         }
     }
     function creaProiettile() {
-        if (!morte) {
+        if (!fuoriPartita) {
             let proiettile = { y: cannone.y - dimensioniProiettiliHeight, x: cannone.x, corpo: document.createElement("img") };
             proiettile.corpo.src = "Proiettile.png";
             listaProiettili.push(proiettile);
@@ -394,7 +514,17 @@
         }
     }
     function tastoPremuto(event) {
-        if (!morte) {
+        console.log(event.key);
+        if (event.key === "Control" && musicaSbloccata) {
+            if (playerMusicaBackground.paused) {
+                playerMusicaBackground.play();
+                document.getElementById("barraSinistra").src = "sound.png";
+            } else {
+                playerMusicaBackground.pause();
+                document.getElementById("barraSinistra").src = "mute.png";
+            }
+        }
+        if (!fuoriPartita) {
             if (event.key === "ArrowLeft" || event.key === "A" || event.key === "a") {
                 console.log(timerCannoneSinistra);
                 if (!timerCannoneSinistra) {
@@ -473,47 +603,27 @@
             if (listaPalle[i].y + dimensioniPalleHeight >= cannone.y + 42) {//42 è l'altezza a cui corrisponde l'inizio del cannone sull'immagine attuale
                 if ((listaPalle[i].x >= cannone.x && listaPalle[i].x <= cannone.x + dimensioniCannoneWidth) || (listaPalle[i].x + dimensioniPalleWidth >= cannone.x && listaPalle[i].x + dimensioniPalleWidth <= cannone.x + dimensioniCannoneWidth)) {
                     //hittato 
-                    morte = true;
+                    fuoriPartita = true;
                     sconfitta();
 
                 }
             }
         }
     }
-    function sconfitta() {
+    function finePartita() {
         window.clearInterval(timerCreaPalle);
         window.clearInterval(timerMuoviPP);
         window.clearInterval(timerSvuotaProiettili);
         window.clearInterval(timerGemme);
         window.clearInterval(timerAumentoDifficolta);
         window.clearInterval(timerDurataPartita);
-        // if (morte) { //senza la boolean si crea la schermataSconfitta 2 volte
-        //nuovo prova
-        for (let i = 0; i < listaPalle.length; i++) {
-            padre.removeChild(listaPalle[i].corpo);
-            padre.removeChild(listaPalle[i].scritta);
-        }
-        for (let i = 0; i < listaProiettili.length; i++) {
-            padre.removeChild(listaProiettili[i].corpo);
-        }
+        cambioSezione();
         listaPalle.length = 0;
         listaProiettili.length = 0;
-        padre.removeChild(cannone.corpo);
         padre.querySelector("nav").style.display = "";
 
         punteggioAttuale = countdown;
         barraSuperiore.querySelector("div").innerText = "";
-
-        console.log("inizio test interessato");
-        console.log(typeof(punteggioAttuale));
-        console.log(punteggioAttuale);
-        console.log(recordEndless);
-
-        // parseInt(punteggioAttuale)
-        console.log(punteggioAttuale > recordEndless);
-        console.log(modalita == "endless");
-        console.log(modalita == "endless" && punteggioAttuale > recordEndless);
-
 
         if (modalita == "endless" && punteggioAttuale > recordEndless) {
             recordEndless = punteggioAttuale;
@@ -534,16 +644,47 @@
                 }
             }
         }
-
+    }
+    function vittoria() {
+        finePartita();
+        schermataVittoria();
+        if (modalita == "livello1") {
+            gemmeDurantePartita = 5;
+        } else {
+            if (modalita == "livello2") {
+                gemmeDurantePartita = 15;
+            } else {
+                if (modalita == "livello3") {
+                    gemmeDurantePartita = 25;
+                } else {
+                    if (modalita == "livello4") {
+                        gemmeDurantePartita = 50;
+                    }
+                }
+            }
+        }
+        massimoPalle = 3;
+        vitaPalle = 200;
+        monete += moneteDurantePartita;//forse sposta ad un timer cosi da aggiornare in tempo reale
+        gemme += gemmeDurantePartita;//forse sposta ad un timer cosi da aggiornare in tempo reale
+        moneteDurantePartita = 0;
+        gemmeDurantePartita = 0;
+        kill = 0;
+    }
+    function schermataVittoria() {
+        creaSchermata();
+        schermataGioco.innerHTML = "<h2> Hai vinto!</h2> <span><p>monete ottenute: " + moneteDurantePartita + "</p><p>gemme ottenute: " + gemmeDurantePartita + "</p></span> <button>riprova</button>";
+        schermataGioco.querySelector("button").addEventListener("click", livelloSelezionato); //mhh me puzza
+    }
+    function sconfitta() {
+        finePartita()
         schermataSconfitta();
         massimoPalle = 3;
         vitaPalle = 200;
-        monete += moneteDurantePartita;
-        gemme += gemmeDurantePartita;
+        monete += moneteDurantePartita;//forse sposta ad un timer cosi da aggiornare in tempo reale
+        gemme += gemmeDurantePartita;//forse sposta ad un timer cosi da aggiornare in tempo reale
         moneteDurantePartita = 0;
         gemmeDurantePartita = 0;
-        // }
-        // morte = true;
     }
     function schermataSconfitta() {
         creaSchermata();
@@ -587,6 +728,8 @@
                         padre.removeChild(listaPalle[j].scritta);
                         listaPalle.splice(j, 1);
                         moneteDurantePartita += 5;
+                        kill++;
+                        if (kill == obbiettivoKill && modalita != "endless") { fuoriPartita = true; vittoria() };
                     }
                 }
             }
@@ -627,7 +770,7 @@
         text-shadow: 2px 2px 0 white;
     }
 
-    body>div:not(#centraLivelli):not(.barra) {
+    body>div:not(#centraLivelli):not(.barra):not(.negozio) {
         background-color: aqua;
         /* display: inline-block; */
     }
@@ -723,8 +866,9 @@
 </style>
 
 <body onload="onload()">
+    <audio src="Green Day - American Idiot.mp3" id="musicaBackground" loop></audio>
     <div class="barra" id="barra">
-        <img class="barra" id="barraSinistra" src="cogwheel.png">
+        <img class="barra" id="barraSinistra" src="sound.png">
         <div class="barra" id="barraCentro">contatore</div>
         <img class="barra" src="Moneta-da-7E-befunky-lagazzettadiviareggio.it_-1024x576.jpg">
         <img class="barra" src="diamante-rosa.jpg">
