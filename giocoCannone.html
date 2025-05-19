@@ -44,7 +44,7 @@
         document.addEventListener("keydown", tastoPremuto);
         document.addEventListener("keyup", tastoRilasciato);
         playerMusicaBackground = document.getElementById("musicaBackground");
-        // document.addEventListener("click", function () { playerMusicaBackground.paused && playerMusicaBackground.currentTime == 0 ? playerMusicaBackground.play() : null; musicaSbloccata = true });
+        //document.addEventListener("click", function () { playerMusicaBackground.paused && playerMusicaBackground.currentTime == 0 ? playerMusicaBackground.play() : null; musicaSbloccata = true });
     }
     let dimensioniCannoneWidth = 200;
     let dimensioniCannoneHeight = 200;
@@ -128,23 +128,37 @@
         //     schermataGioco.querySelector("button").addEventListener("click", startPartita); //mhh me puzza
     }
     function sezioneNegozio() {
+
         cambioSezione();
-        let contenitoreNegozio = document.createElement("div");
-        padre.appendChild(contenitoreNegozio);
-        let sezionePotenziamenti = document.createElement("img");
-        let sezionePoteri = document.createElement("img");
-        let sezioneTemi = document.createElement("img");
 
-        let potenziaVelocita = document.createElement("img");
-        let potenziaDanno = document.createElement("img");
+    let potenziaVelocita = {
+        // corpo: document.createElement("img"),
+        // corpoCosto: document.createElement("div"),
+        id: "potenziaVelocita",
+        immagine: "Coez.PNG",
+        costo: 200,
+        livello: 1,
+        livelloMax: 25
+    }
 
-        let potereDannoDoppio = document.createElement("img");
-        let potereInvisibile = document.createElement("img");
 
-        let temaNatura = document.createElement("img");
-        let temaCandyland = document.createElement("img");
-        let temaGalaxy = document.createElement("img");
-        let temaOG = document.createElement("img");
+
+        // let contenitoreNegozio = document.createElement("div");
+        // padre.appendChild(contenitoreNegozio);
+        // let sezionePotenziamenti = document.createElement("img");
+        // let sezionePoteri = document.createElement("img");
+        // let sezioneTemi = document.createElement("img");
+
+        // // let potenziaVelocita = document.createElement("img");
+        // let potenziaDanno = document.createElement("img");
+
+        // let potereDannoDoppio = document.createElement("img");
+        // let potereInvisibile = document.createElement("img");
+
+        // let temaNatura = document.createElement("img");
+        // let temaCandyland = document.createElement("img");
+        // let temaGalaxy = document.createElement("img");
+        // let temaOG = document.createElement("img");
 
         let indietro = document.createElement("img");
 
@@ -161,6 +175,18 @@
             temaGalaxy,
             temaOG,
         ];
+        sezionePotenziamenti.id = "sezionePotenziamenti";
+        sezionePoteri.id = "sezionePoteri";
+        sezioneTemi.id = "sezioneTemi";
+        potenziaVelocita.id = "potenziaVelocita";
+        potenziaDanno.id = "potenziaDanno";
+        potereDannoDoppio.id = "potereDannoDoppio";
+        potereInvisibile.id = "potereInvisibile";
+        temaNatura.id = "temaNatura";
+        temaCandyland.id = "temaCandyland";
+        temaGalaxy.id = "temaGalaxy";
+        temaOG.id = "temaOG";
+
 
         indietro.src = "cogwheel.png";
         indietro.id = "indietro";
@@ -234,7 +260,9 @@
         contenitoreNegozio.appendChild(sezionePotenziamenti);
         contenitoreNegozio.appendChild(sezionePoteri);
         contenitoreNegozio.appendChild(sezioneTemi);
-        
+
+//se prova a rifallo
+         
     }
     function sezioneGuardaroba() {
         cambioSezione();
@@ -242,8 +270,11 @@
     function sezioneImpostazioni() {
         cambioSezione();
     }
-    function negozio(event){
-        if(event.target.id == "indietro"){
+    function negozio(event) {
+        if (event.target.id == "indietro") {
+            sezioneNegozio();
+        }
+        if (event.target.id == "") {
             sezioneNegozio();
         }
     }
