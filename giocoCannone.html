@@ -884,6 +884,8 @@
         /* Allinea gli oggetti verticalmente al centro */
         width: 100%;
         /* Assicurati che il contenitore occupi tutta la larghezza */
+        position: relative;
+        z-index: 6; /*forse basta 5; */
     }
 
     #barraCentro {
@@ -892,7 +894,9 @@
         /* Centra il testo nel div */
         flex-grow: 1;
         /* Fai in modo che il centro prenda il massimo spazio possibile */
-        /* text-align: center;          Centra il testo nel div */
+        /* text-align: center;   
+               Centra il testo nel div */
+               
     }
 </style>
 
