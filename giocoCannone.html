@@ -8,7 +8,11 @@
 </head>
 <script>
     //principali:
-    //continuare sezioneNegozio
+    //TODO: stabilire i prezzi degli oggetti
+    //TODO: finire il for che aggiunge gli oggetti e le loro proprietà
+    //TODO: inserirre counter kill(implementerlo con la barra di riempimento di fine livello)
+    //TODO: mettere scritta sopra il tasto del volume con il comando per toglierlo
+    //TODO: fare in modo che quando non c'è la barrasuperiore invece di stirare le immagine si creano dei gap tra le immagini(problema con il height %)
     //TODO: modificare il tempo a disposizione per completare il livello in base al livello selezionato
     //FIXME: ottimizzare il controllo delle collisioni in modo da fare meno controlli(Spatial Partitioning)
     //BUG: fixare le scritte delle palle che si sovrappongono tra di loro (magari facendo un random che alla generazione delle scritte insierisce zindex alle palle e scritte di 1/2 o 3/4)
@@ -86,7 +90,7 @@
     let punteggioAttuale = 0;
     let kill = 0;
     let obbiettivoKill;
-
+    let sezioneArticoli;
     // let listaBarra = [];
     // listaBarra.length=8;
     // console.log(listaBarra);
@@ -128,19 +132,136 @@
         //     schermataGioco.querySelector("button").addEventListener("click", startPartita); //mhh me puzza
     }
     function sezioneNegozio() {
-
         cambioSezione();
+        sezioneArticoli = document.createElement("div");
+        let sezionePotenziamenti = document.createElement("div");
+        let sezionePoteri = document.createElement("div");
+        let sezioneTemi = document.createElement("div");
+        sezioneArticoli.id = "sezioneArticoli";
+        sezioneArticoli.classList.add("barraPresente");
+        sezionePotenziamenti.id = "sezionePotenziamenti";
+        sezionePoteri.id = "sezionePoteri";
+        sezioneTemi.id = "sezioneTemi";
+        padre.appendChild(sezioneArticoli);
+        sezioneArticoli.appendChild(sezionePotenziamenti);
+        sezioneArticoli.appendChild(sezionePoteri);
+        sezioneArticoli.appendChild(sezioneTemi);
+        sezioneArticoli.classList.add("negozio");
+        sezionePotenziamenti.className = "negozio";
+        sezionePoteri.className = "negozio";
+        sezioneTemi.className = "negozio";
 
-    let potenziaVelocita = {
-        // corpo: document.createElement("img"),
-        // corpoCosto: document.createElement("div"),
-        id: "potenziaVelocita",
-        immagine: "Coez.PNG",
-        costo: 200,
-        livello: 1,
-        livelloMax: 25
-    }
 
+
+        let potenziaVelocita = {
+            id: "potenziaVelocita",
+            immagine: "Coez.PNG",
+            costo: 200,
+            livello: 1,
+            livelloMax: 25
+        };
+
+        let potenziaDanno = {
+            id: "potenziaDanno",
+            immagine: "Coez.PNG",
+            costo: 200,
+            livello: 1,
+            livelloMax: 25
+        };
+
+        let potereDannoDoppio = {
+            id: "potereDannoDoppio",
+            immagine: "Coez.PNG",
+            costo: 300,
+            livello: 1,
+            livelloMax: 10
+        };
+
+        let potereInvisibile = {
+            id: "potereInvisibile",
+            immagine: "Coez.PNG",
+            costo: 300,
+            livello: 1,
+            livelloMax: 10
+        };
+
+        let temaNatura = {
+            id: "temaNatura",
+            immagine: "Coez.PNG",
+            costo: 100
+        };
+
+        let temaCandyland = {
+            id: "temaCandyland",
+            immagine: "Coez.PNG",
+            costo: 100
+        };
+
+        let temaGalaxy = {
+            id: "temaGalaxy",
+            immagine: "Coez.PNG",
+            costo: 100
+        };
+
+        let temaOG = {
+            id: "temaOG",
+            immagine: "Coez.PNG",
+            costo: 0
+        };
+
+        // Creo la lista includendo tutti gli oggetti
+        let listaArticoliNegozio = [
+            // sezionePotenziamenti,
+            // sezionePoteri,
+            // sezioneTemi,
+            potenziaVelocita,
+            potenziaDanno,
+            potereDannoDoppio,
+            potereInvisibile,
+            temaNatura,
+            temaCandyland,
+            temaGalaxy,
+            temaOG
+        ];
+        listaArticoliNegozio.forEach(articolo => {
+            articolo.corpo = document.createElement("img"),
+                articolo.corpoCosto = document.createElement("div"),
+                articolo.corpo.className = "negozio";
+            articolo.corpoCosto.className = "negozio";
+            articolo.corpo.src = "Coez.PNG";
+            if (articolo.id.startsWith("potenzia")) {
+                sezionePotenziamenti.appendChild(articolo.corpo);
+                sezionePotenziamenti.appendChild(articolo.corpoCosto)
+            } else {
+                if (articolo.id.startsWith("potere")) {
+                    sezionePoteri.appendChild(articolo.corpo);
+                    sezionePoteri.appendChild(articolo.corpoCosto);
+                } else {
+                    sezioneTemi.appendChild(articolo.corpo);
+                    sezioneTemi.appendChild(articolo.corpoCosto);
+                }
+            }
+        });
+        // let listaArticoliNegozio = [
+        //     {
+        //         // corpo: document.createElement("img"),
+        //         // corpoCosto: document.createElement("div"),
+        //         id: "potenziaVelocita",
+        //         immagine: "Coez.PNG",
+        //         costo: 200,
+        //         livello: 1,
+        //         livelloMax: 25
+        //     },
+        //     {
+        //         // corpo: document.createElement("img"),
+        //         // corpoCosto: document.createElement("div"),
+        //         id: "potenziaDanno",
+        //         immagine: "Coez.PNG",
+        //         costo: 200,
+        //         livello: 1,
+        //         livelloMax: 25
+        //     },
+        // ]
 
 
         // let contenitoreNegozio = document.createElement("div");
@@ -160,44 +281,44 @@
         // let temaGalaxy = document.createElement("img");
         // let temaOG = document.createElement("img");
 
-        let indietro = document.createElement("img");
+        // let indietro = document.createElement("img");
 
-        let immagini = [
-            sezionePotenziamenti,
-            sezionePoteri,
-            sezioneTemi,
-            potenziaVelocita,
-            potenziaDanno,
-            potereDannoDoppio,
-            potereInvisibile,
-            temaNatura,
-            temaCandyland,
-            temaGalaxy,
-            temaOG,
-        ];
-        sezionePotenziamenti.id = "sezionePotenziamenti";
-        sezionePoteri.id = "sezionePoteri";
-        sezioneTemi.id = "sezioneTemi";
-        potenziaVelocita.id = "potenziaVelocita";
-        potenziaDanno.id = "potenziaDanno";
-        potereDannoDoppio.id = "potereDannoDoppio";
-        potereInvisibile.id = "potereInvisibile";
-        temaNatura.id = "temaNatura";
-        temaCandyland.id = "temaCandyland";
-        temaGalaxy.id = "temaGalaxy";
-        temaOG.id = "temaOG";
+        // let immagini = [
+        //     sezionePotenziamenti,
+        //     sezionePoteri,
+        //     sezioneTemi,
+        //     potenziaVelocita,
+        //     potenziaDanno,
+        //     potereDannoDoppio,
+        //     potereInvisibile,
+        //     temaNatura,
+        //     temaCandyland,
+        //     temaGalaxy,
+        //     temaOG,
+        // ];
+        // sezionePotenziamenti.id = "sezionePotenziamenti";
+        // sezionePoteri.id = "sezionePoteri";
+        // sezioneTemi.id = "sezioneTemi";
+        // potenziaVelocita.id = "potenziaVelocita";
+        // potenziaDanno.id = "potenziaDanno";
+        // potereDannoDoppio.id = "potereDannoDoppio";
+        // potereInvisibile.id = "potereInvisibile";
+        // temaNatura.id = "temaNatura";
+        // temaCandyland.id = "temaCandyland";
+        // temaGalaxy.id = "temaGalaxy";
+        // temaOG.id = "temaOG";
 
 
-        indietro.src = "cogwheel.png";
-        indietro.id = "indietro";
+        // indietro.src = "cogwheel.png";
+        // indietro.id = "indietro";
 
-        contenitoreNegozio.className = "negozio";
+        // contenitoreNegozio.className = "negozio";
 
-        // Aggiungo la stessa classe a tutti gli elementi
-        immagini.forEach(img => {
-            img.className = "negozio";
-            img.src = "Coez.PNG";
-        });
+        // // Aggiungo la stessa classe a tutti gli elementi
+        // immagini.forEach(img => {
+        //     img.className = "negozio";
+        //     img.src = "Coez.PNG";
+        // });
 
         // sezionePotenziamenti.id = "livello1";
         // livello2.id = "livello2";
@@ -214,55 +335,55 @@
         // livello3.id = "livello3";
         // livello4.id = "livello4";
 
-        sezionePotenziamenti.addEventListener("click", function () {
-            contenitoreNegozio.removeChild(sezionePotenziamenti);
-            contenitoreNegozio.removeChild(sezionePoteri);
-            contenitoreNegozio.removeChild(sezioneTemi);
+        // sezionePotenziamenti.addEventListener("click", function () {
+        //     contenitoreNegozio.removeChild(sezionePotenziamenti);
+        //     contenitoreNegozio.removeChild(sezionePoteri);
+        //     contenitoreNegozio.removeChild(sezioneTemi);
 
-            potenziaVelocita.addEventListener("click", negozio);
-            potenziaDanno.addEventListener("click", negozio);
-            indietro.addEventListener("click", negozio);
+        //     potenziaVelocita.addEventListener("click", negozio);
+        //     potenziaDanno.addEventListener("click", negozio);
+        //     indietro.addEventListener("click", negozio);
 
-            contenitoreNegozio.appendChild(potenziaVelocita);
-            contenitoreNegozio.appendChild(potenziaDanno);
-            contenitoreNegozio.appendChild(indietro);
-        });
-        sezionePoteri.addEventListener("click", function () {
-            contenitoreNegozio.removeChild(sezionePotenziamenti);
-            contenitoreNegozio.removeChild(sezionePoteri);
-            contenitoreNegozio.removeChild(sezioneTemi);
+        //     contenitoreNegozio.appendChild(potenziaVelocita);
+        //     contenitoreNegozio.appendChild(potenziaDanno);
+        //     contenitoreNegozio.appendChild(indietro);
+        // });
+        // sezionePoteri.addEventListener("click", function () {
+        //     contenitoreNegozio.removeChild(sezionePotenziamenti);
+        //     contenitoreNegozio.removeChild(sezionePoteri);
+        //     contenitoreNegozio.removeChild(sezioneTemi);
 
-            potereDannoDoppio.addEventListener("click", negozio);
-            potereInvisibile.addEventListener("click", negozio);
-            indietro.addEventListener("click", negozio);
+        //     potereDannoDoppio.addEventListener("click", negozio);
+        //     potereInvisibile.addEventListener("click", negozio);
+        //     indietro.addEventListener("click", negozio);
 
-            contenitoreNegozio.appendChild(potereDannoDoppio);
-            contenitoreNegozio.appendChild(potereInvisibile);
-            contenitoreNegozio.appendChild(indietro);
-        });
-        sezioneTemi.addEventListener("click", function () {
-            contenitoreNegozio.removeChild(sezionePotenziamenti);
-            contenitoreNegozio.removeChild(sezionePoteri);
-            contenitoreNegozio.removeChild(sezioneTemi);
+        //     contenitoreNegozio.appendChild(potereDannoDoppio);
+        //     contenitoreNegozio.appendChild(potereInvisibile);
+        //     contenitoreNegozio.appendChild(indietro);
+        // });
+        // sezioneTemi.addEventListener("click", function () {
+        //     contenitoreNegozio.removeChild(sezionePotenziamenti);
+        //     contenitoreNegozio.removeChild(sezionePoteri);
+        //     contenitoreNegozio.removeChild(sezioneTemi);
 
-            temaNatura.addEventListener("click", negozio);
-            temaCandyland.addEventListener("click", negozio);
-            temaGalaxy.addEventListener("click", negozio);
-            temaOG.addEventListener("click", negozio);
-            indietro.addEventListener("click", negozio);
+        //     temaNatura.addEventListener("click", negozio);
+        //     temaCandyland.addEventListener("click", negozio);
+        //     temaGalaxy.addEventListener("click", negozio);
+        //     temaOG.addEventListener("click", negozio);
+        //     indietro.addEventListener("click", negozio);
 
-            contenitoreNegozio.appendChild(temaNatura);
-            contenitoreNegozio.appendChild(temaCandyland);
-            contenitoreNegozio.appendChild(temaGalaxy);
-            contenitoreNegozio.appendChild(temaOG);
-            contenitoreNegozio.appendChild(indietro);
-        });
-        contenitoreNegozio.appendChild(sezionePotenziamenti);
-        contenitoreNegozio.appendChild(sezionePoteri);
-        contenitoreNegozio.appendChild(sezioneTemi);
+        //     contenitoreNegozio.appendChild(temaNatura);
+        //     contenitoreNegozio.appendChild(temaCandyland);
+        //     contenitoreNegozio.appendChild(temaGalaxy);
+        //     contenitoreNegozio.appendChild(temaOG);
+        //     contenitoreNegozio.appendChild(indietro);
+        // });
+        // contenitoreNegozio.appendChild(sezionePotenziamenti);
+        // contenitoreNegozio.appendChild(sezionePoteri);
+        // contenitoreNegozio.appendChild(sezioneTemi);
 
-//se prova a rifallo
-         
+        //se prova a rifallo
+
     }
     function sezioneGuardaroba() {
         cambioSezione();
@@ -591,17 +712,24 @@
                 if (!timerCannoneSpara) {
                     timerCannoneSpara = window.setInterval(function () {
                         creaProiettile();
-                        controllaCollisioni = true
+                        controllaCollisioni = true;
                     }, 50);
                 }
                 console.log(event.key);
             }
         }
         if (event.key === " ") {
-            if (barraSuperiore.style.display == "flex") {
+            if (getComputedStyle(barraSuperiore).display == "flex") {//guarda qual'è il display effettivo indipendentemente da dove è stato assegnato
                 barraSuperiore.style.display = "none";
-            } else {
+                if (sezioneArticoli!=undefined) {
+                        sezioneArticoli.classList.remove("barraPresente");
+                    }
+                }
+             else {
                 barraSuperiore.style.display = "flex";
+                if (sezioneArticoli!=undefined) {
+                        sezioneArticoli.classList.add("barraPresente");
+                    }
             }
         }
     }
@@ -782,6 +910,7 @@
         width: 100vw;
         background-color: brown;
         display: flex;
+        /* transition: display 1.3s ease; */
     }
 
     nav img {
@@ -883,9 +1012,11 @@
         align-items: center;
         /* Allinea gli oggetti verticalmente al centro */
         width: 100%;
+        height: 10vh;
         /* Assicurati che il contenitore occupi tutta la larghezza */
         position: relative;
-        z-index: 6; /*forse basta 5; */
+        z-index: 6;
+        /*forse basta 5; */
     }
 
     #barraCentro {
@@ -896,7 +1027,51 @@
         /* Fai in modo che il centro prenda il massimo spazio possibile */
         /* text-align: center;   
                Centra il testo nel div */
-               
+
+    }
+
+    #sezioneArticoli {
+        display: flex;
+        background-color: rgb(210, 201, 30);
+        width: 100vw;
+        height: 80vh;
+        /* min-height: 0; */
+    }
+
+    #sezioneArticoli>div {
+        width: 100%;
+        /* height: 80vh; */
+    }
+        /* #sezioneArticoli>div.barraPresente {
+        width: 100%;
+        height: 70vh;
+    } */
+
+    #sezioneArticoli img {
+        /* width: 100%; */
+        height: 25%;
+        flex: 1
+    }
+
+    #sezionePotenziamenti {
+        background-color: chocolate;
+        display: flex;
+        flex-direction: column;
+    }
+
+    #sezionePoteri {
+        background-color: rgb(210, 30, 126);
+        display: flex;
+        flex-direction: column;
+    }
+
+    #sezioneTemi {
+        background-color: rgb(30, 210, 54);
+        display: flex;
+        flex-direction: column;
+    }
+    #sezioneArticoli.barraPresente{
+        height: 70vh;
     }
 </style>
 
@@ -915,8 +1090,6 @@
         <img class="menu" src="Coez.PNG" onclick="sezioneGuardaroba()">
         <img class="menu" src="Coez.PNG" onclick="sezioneImpostazioni()">
     </nav>
-
-
 </body>
 
 </html>
