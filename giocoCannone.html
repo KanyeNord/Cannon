@@ -224,21 +224,17 @@
             temaOG
         ];
         listaArticoliNegozio.forEach(articolo => {
-            articolo.corpo = document.createElement("img"),
-                articolo.corpoCosto = document.createElement("div"),
-                articolo.corpo.className = "negozio";
-            articolo.corpoCosto.className = "negozio";
+            articolo.corpo = document.createElement("div"),
+                articolo.corpo.innerText = "costo";
+                articolo.corpo.className = "negozio prezzo";
             articolo.corpo.src = "Coez.PNG";
             if (articolo.id.startsWith("potenzia")) {
                 sezionePotenziamenti.appendChild(articolo.corpo);
-                sezionePotenziamenti.appendChild(articolo.corpoCosto)
             } else {
                 if (articolo.id.startsWith("potere")) {
                     sezionePoteri.appendChild(articolo.corpo);
-                    sezionePoteri.appendChild(articolo.corpoCosto);
                 } else {
                     sezioneTemi.appendChild(articolo.corpo);
-                    sezioneTemi.appendChild(articolo.corpoCosto);
                 }
             }
         });
@@ -1047,11 +1043,11 @@
         height: 70vh;
     } */
 
-    #sezioneArticoli img {
-        /* width: 100%; */
+    /* #sezioneArticoli img {
+        /* width: 100%;
         height: 25%;
         flex: 1
-    }
+    } */
 
     #sezionePotenziamenti {
         background-color: chocolate;
@@ -1072,6 +1068,12 @@
     }
     #sezioneArticoli.barraPresente{
         height: 70vh;
+    }
+    .prezzo {
+        background-image: url("Coez.PNG");
+        height: fit-content;
+        flex: 1;
+        /* non ripetere lo sfondo */
     }
 </style>
 
