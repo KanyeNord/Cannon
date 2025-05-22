@@ -51,6 +51,81 @@
         playerMusicaBackground = document.getElementById("musicaBackground");
         //document.addEventListener("click", function () { playerMusicaBackground.paused && playerMusicaBackground.currentTime == 0 ? playerMusicaBackground.play() : null; musicaSbloccata = true });
     }
+
+    let potenziaVelocita = {
+        id: "potenziaVelocita",
+        immagine: "Coez.PNG",
+        costo: 20,
+        livello: 1,
+        livelloMax: 25
+    };
+
+    let potenziaDanno = {
+        id: "potenziaDanno",
+        immagine: "Coez.PNG",
+        costo: 20,
+        livello: 1,
+        livelloMax: 25
+    };
+
+    let potereDannoDoppio = {
+        id: "potereDannoDoppio",
+        immagine: "Coez.PNG",
+        costo: 150,
+        livello: 1,
+        comprato: false
+    };
+
+    let potereInvisibile = {
+        id: "potereInvisibile",
+        immagine: "Coez.PNG",
+        costo: 150,
+        comprato: false
+    };
+
+    let temaCandyland = {
+        id: "temaCandyland",
+        immagine: "Coez.PNG",
+        costo: 300,
+        comprato: false
+    };
+
+    let temaInferno = {
+        id: "temaInferno",
+        immagine: "Coez.PNG",
+        costo: 500,
+        comprato: false
+    };
+
+    let temaGalaxy = {
+        id: "temaGalaxy",
+        immagine: "Coez.PNG",
+        costo: 1000,
+        comprato: false
+    };
+
+    let temaOG = {
+        id: "temaOG",
+        immagine: "Coez.PNG",
+        costo: 2000,
+        comprato: false
+    };
+
+    // Creo la lista includendo tutti gli oggetti
+    let listaArticoliNegozio = [
+        // sezionePotenziamenti,
+        // sezionePoteri,
+        // sezioneTemi,
+        potenziaVelocita,
+        potenziaDanno,
+        potereDannoDoppio,
+        potereInvisibile,
+        temaInferno,
+        temaCandyland,
+        temaGalaxy,
+        temaOG
+    ];
+
     let dimensioniCannoneWidth = 200;
     let dimensioniCannoneHeight = 200;
     let dimensioniPalleWidth = 200;
@@ -92,7 +167,13 @@
     let kill = 0;
     let obbiettivoKill;
     let sezioneArticoli;
-    let listaArticoliNegozio;
+
+    // let potereDannoDoppioSbloccato = false;
+    // let potereInvisibileSbloccato = false;
+    // let temaCandylandSbloccato = false;
+    // let temaGalaxySbloccato = false;
+    // let temaInfernoSbloccato = false;
+    // let temaOGSbloccato = false;
     // let listaBarra = [];
     // listaBarra.length=8;
     // console.log(listaBarra);
@@ -155,81 +236,12 @@
 
 
 
-        let potenziaVelocita = {
-            id: "potenziaVelocita",
-            immagine: "Coez.PNG",
-            costo: 20,
-            livello: 1,
-            livelloMax: 25
-        };
 
-        let potenziaDanno = {
-            id: "potenziaDanno",
-            immagine: "Coez.PNG",
-            costo: 20,
-            livello: 1,
-            livelloMax: 25
-        };
-
-        let potereDannoDoppio = {
-            id: "potereDannoDoppio",
-            immagine: "Coez.PNG",
-            costo: 150,
-            livello: 1,
-            livelloMax: 10
-        };
-
-        let potereInvisibile = {
-            id: "potereInvisibile",
-            immagine: "Coez.PNG",
-            costo: 150,
-            livello: 1,
-            livelloMax: 10
-        };
-
-        let temaCandyland = {
-            id: "temaCandyland",
-            immagine: "Coez.PNG",
-            costo: 300
-        };
-
-        let temaInferno = {
-            id: "temaInferno",
-            immagine: "Coez.PNG",
-            costo: 500
-        };
-
-        let temaGalaxy = {
-            id: "temaGalaxy",
-            immagine: "Coez.PNG",
-            costo: 1000
-        };
-
-        let temaOG = {
-            id: "temaOG",
-            immagine: "Coez.PNG",
-            costo: 2000
-        };
-
-        // Creo la lista includendo tutti gli oggetti
-        listaArticoliNegozio = [
-            // sezionePotenziamenti,
-            // sezionePoteri,
-            // sezioneTemi,
-            potenziaVelocita,
-            potenziaDanno,
-            potereDannoDoppio,
-            potereInvisibile,
-            temaInferno,
-            temaCandyland,
-            temaGalaxy,
-            temaOG
-        ];
         listaArticoliNegozio.forEach(articolo => {
             articolo.corpo = document.createElement("div"),
                 articolo.corpo.className = "negozio prezzo";
-                articolo.corpo.id = articolo.id;
-                articolo.corpo.addEventListener("click", negozio);
+            articolo.corpo.id = articolo.id;
+            articolo.corpo.addEventListener("click", funzioneNegozio(articolo));
             // articolo.corpo.src = "Coez.PNG"; tenere in caso si faccia uno sfondo diverso in base alla sezione
             if (articolo.id.startsWith("potenzia")) {
                 aggiornaScrittaNegozio(articolo)
@@ -244,196 +256,114 @@
                 }
             }
         });
-        // let listaArticoliNegozio = [
-        //     {
-        //         // corpo: document.createElement("img"),
-        //         // corpoCosto: document.createElement("div"),
-        //         id: "potenziaVelocita",
-        //         immagine: "Coez.PNG",
-        //         costo: 200,
-        //         livello: 1,
-        //         livelloMax: 25
-        //     },
-        //     {
-        //         // corpo: document.createElement("img"),
-        //         // corpoCosto: document.createElement("div"),
-        //         id: "potenziaDanno",
-        //         immagine: "Coez.PNG",
-        //         costo: 200,
-        //         livello: 1,
-        //         livelloMax: 25
-        //     },
-        // ]
-
-
-        // let contenitoreNegozio = document.createElement("div");
-        // padre.appendChild(contenitoreNegozio);
-        // let sezionePotenziamenti = document.createElement("img");
-        // let sezionePoteri = document.createElement("img");
-        // let sezioneTemi = document.createElement("img");
-
-        // // let potenziaVelocita = document.createElement("img");
-        // let potenziaDanno = document.createElement("img");
-
-        // let potereDannoDoppio = document.createElement("img");
-        // let potereInvisibile = document.createElement("img");
-
-        // let temaNatura = document.createElement("img");
-        // let temaCandyland = document.createElement("img");
-        // let temaGalaxy = document.createElement("img");
-        // let temaOG = document.createElement("img");
-
-        // let indietro = document.createElement("img");
-
-        // let immagini = [
-        //     sezionePotenziamenti,
-        //     sezionePoteri,
-        //     sezioneTemi,
-        //     potenziaVelocita,
-        //     potenziaDanno,
-        //     potereDannoDoppio,
-        //     potereInvisibile,
-        //     temaNatura,
-        //     temaCandyland,
-        //     temaGalaxy,
-        //     temaOG,
-        // ];
-        // sezionePotenziamenti.id = "sezionePotenziamenti";
-        // sezionePoteri.id = "sezionePoteri";
-        // sezioneTemi.id = "sezioneTemi";
-        // potenziaVelocita.id = "potenziaVelocita";
-        // potenziaDanno.id = "potenziaDanno";
-        // potereDannoDoppio.id = "potereDannoDoppio";
-        // potereInvisibile.id = "potereInvisibile";
-        // temaNatura.id = "temaNatura";
-        // temaCandyland.id = "temaCandyland";
-        // temaGalaxy.id = "temaGalaxy";
-        // temaOG.id = "temaOG";
-
-
-        // indietro.src = "cogwheel.png";
-        // indietro.id = "indietro";
-
-        // contenitoreNegozio.className = "negozio";
-
-        // // Aggiungo la stessa classe a tutti gli elementi
-        // immagini.forEach(img => {
-        //     img.className = "negozio";
-        //     img.src = "Coez.PNG";
-        // });
-
-        // sezionePotenziamenti.id = "livello1";
-        // livello2.id = "livello2";
-        // livello3.id = "livello3";
-
-        // livello1.id = "livello1";
-        // livello2.id = "livello2";
-
-        // livello3.id = "livello3";
-        // livello4.id = "livello4";
-
-        // livello1.id = "livello1";
-        // livello2.id = "livello2";
-        // livello3.id = "livello3";
-        // livello4.id = "livello4";
-
-        // sezionePotenziamenti.addEventListener("click", function () {
-        //     contenitoreNegozio.removeChild(sezionePotenziamenti);
-        //     contenitoreNegozio.removeChild(sezionePoteri);
-        //     contenitoreNegozio.removeChild(sezioneTemi);
-
-        //     potenziaVelocita.addEventListener("click", negozio);
-        //     potenziaDanno.addEventListener("click", negozio);
-        //     indietro.addEventListener("click", negozio);
-
-        //     contenitoreNegozio.appendChild(potenziaVelocita);
-        //     contenitoreNegozio.appendChild(potenziaDanno);
-        //     contenitoreNegozio.appendChild(indietro);
-        // });
-        // sezionePoteri.addEventListener("click", function () {
-        //     contenitoreNegozio.removeChild(sezionePotenziamenti);
-        //     contenitoreNegozio.removeChild(sezionePoteri);
-        //     contenitoreNegozio.removeChild(sezioneTemi);
-
-        //     potereDannoDoppio.addEventListener("click", negozio);
-        //     potereInvisibile.addEventListener("click", negozio);
-        //     indietro.addEventListener("click", negozio);
-
-        //     contenitoreNegozio.appendChild(potereDannoDoppio);
-        //     contenitoreNegozio.appendChild(potereInvisibile);
-        //     contenitoreNegozio.appendChild(indietro);
-        // });
-        // sezioneTemi.addEventListener("click", function () {
-        //     contenitoreNegozio.removeChild(sezionePotenziamenti);
-        //     contenitoreNegozio.removeChild(sezionePoteri);
-        //     contenitoreNegozio.removeChild(sezioneTemi);
-
-        //     temaNatura.addEventListener("click", negozio);
-        //     temaCandyland.addEventListener("click", negozio);
-        //     temaGalaxy.addEventListener("click", negozio);
-        //     temaOG.addEventListener("click", negozio);
-        //     indietro.addEventListener("click", negozio);
-
-        //     contenitoreNegozio.appendChild(temaNatura);
-        //     contenitoreNegozio.appendChild(temaCandyland);
-        //     contenitoreNegozio.appendChild(temaGalaxy);
-        //     contenitoreNegozio.appendChild(temaOG);
-        //     contenitoreNegozio.appendChild(indietro);
-        // });
-        // contenitoreNegozio.appendChild(sezionePotenziamenti);
-        // contenitoreNegozio.appendChild(sezionePoteri);
-        // contenitoreNegozio.appendChild(sezioneTemi);
-
-        //se prova a rifallo
-
     }
     function sezioneGuardaroba() {
         cambioSezione();
+        let centraTemi = document.createElement("div");
+        centraTemi.id = "centraTemi";
+        padre.appendChild(centraTemi);
+        let natura = document.createElement("img");
+        natura.className = "guardaroba";
+        natura.src = "Coez.PNG";
+        centraTemi.appendChild(natura);
+        let posizione1 = listaArticoliNegozio.findIndex(articolo => articolo.id === "temaCandyland");
+        let posizione2 = listaArticoliNegozio.findIndex(articolo => articolo.id === "temaGalaxy");
+        let posizione3 = listaArticoliNegozio.findIndex(articolo => articolo.id === "temaInferno");
+        let posizione4 = listaArticoliNegozio.findIndex(articolo => articolo.id === "temaOG");
+        if (listaArticoliNegozio[posizione1].comprato == true) {
+            let candyland = document.createElement("img");
+            candyland.addEventListener("click", cambioTema);
+            candyland.className = "guardaroba";
+            candyland.src = "Coez.PNG";
+            centraTemi.appendChild(candyland);
+        }
+        if (listaArticoliNegozio[posizione2].comprato == true) {
+            let galaxy = document.createElement("img");
+            galaxy.addEventListener("click", cambioTema);
+            galaxy.className = "guardaroba";
+            galaxy.src = "Coez.PNG";
+            centraTemi.appendChild(galaxy);
+        }
+        if (listaArticoliNegozio[posizione3].comprato == true) {
+            let inferno = document.createElement("img");
+            inferno.addEventListener("click", cambioTema);
+            inferno.className = "guardaroba";
+            inferno.src = "Coez.PNG";
+            centraTemi.appendChild(inferno);
+        }
+        if (listaArticoliNegozio[posizione4].comprato == true) {
+            let og = document.createElement("img");
+            og.addEventListener("click", cambioTema);
+            og.className = "guardaroba";
+            og.src = "Coez.PNG";
+            centraTemi.appendChild(og);
+        }
+
+        // temaInferno,
+        // temaCandyland,
+        // temaGalaxy,
+        // temaOG
     }
     function sezioneImpostazioni() {
         cambioSezione();
     }
-    function aggiornaScrittaNegozio(articolo){
-        if(articolo.id == "potenziaDanno" || articolo.id == "potenziaVelocita"){
+    function cambioTema() {
+
+    }
+    function aggiornaScrittaNegozio(articolo) {
+        if (articolo.id == "potenziaDanno" || articolo.id == "potenziaVelocita") {
             //non funziona
             //sistemare le immagini sulla barra superiore
-            
-            if(articolo.livello<articolo.LivelloMax){
+            // console.log("inizio test interessato");
+            // console.log(articolo.livello);
+            // console.log(articolo.livelloMax);
+            // console.log(articolo.livello<articolo.livelloMax);
+            if (articolo.livello < articolo.livelloMax) {
                 articolo.corpo.innerText = "costo: " + articolo.costo + " livello: " + articolo.livello;
             } else {
-        articolo.corpo.innerText = "Livello Massimo";
+                articolo.corpo.innerText = "Livello Massimo";
             }
         } else {
-            articolo.corpo.innerText = "costo: " + articolo.costo;
+            if (articolo.comprato) {
+                articolo.corpo.innerText = "Sold out";
+            } else {
+                articolo.corpo.innerText = "costo: " + articolo.costo;
+            }
         }
     }
-    function negozio(event) {
-        let articoloSelezionato;
+    function funzioneNegozio(articolo) {//siccome non posso mettere un parametro nell'event listener uso questa funzione di passaggio
+        return function () {
+            negozio(articolo);
+        };
+    }
+    function negozio(articolo) {
         monete = 1000000;
-        // if (event.target.id == "indietro") {
-        //     sezioneNegozio();
-        // }
-        // console.log(event.target.id);
-        console.log(event.target.id == "potenziaDanno");
-        if (event.target.id == "potenziaDanno") {
-            // console.log(monete);
-            // console.log(monete>event.target.costo);
-            if(monete>listaArticoliNegozio[1].costo){
-                // console.log(listaArticoliNegozio[1].livelloMax)
-
-                if(listaArticoliNegozio[1].livello<listaArticoliNegozio[1].livelloMax){
-                danno+=5;
-                listaArticoliNegozio[1].livello++;
-                listaArticoliNegozio[1].costo+=20;
-                monete-=listaArticoliNegozio[1].costo;
-                } else {
-                    listaArticoliNegozio[1].corpo.innerText = "livello Max";
+        if (articolo.id == "potenziaVelocita" || articolo.id == "potenziaDanno") {
+            if (monete > articolo.costo) {
+                if (articolo.livello < articolo.livelloMax) {
+                    if (articolo.id == "potenziaVelocita") {
+                        passo += 5;
+                    } else {
+                        danno += 5;
+                    }
+                    articolo.livello++;
+                    articolo.costo += 20;
+                    monete -= articolo.costo;
                 }
             } else {
-               alert("monete insufficienti");
+                alert("monete insufficienti");//cambiare la scritta per 1 secondo per poi tornare normale
             }
-            aggiornaScrittaNegozio(listaArticoliNegozio[1]);
+        } else {
+            if (monete > articolo.costo) {
+                if (!articolo.comprato) {
+                    articolo.comprato = true;
+                    monete -= articolo.costo;
+                }
+            } else {
+                alert("monete insufficienti");
+            }
         }
+        aggiornaScrittaNegozio(articolo);
         //     potenziaVelocita,
         //     potenziaDanno,
         //     potereDannoDoppio,
@@ -765,15 +695,15 @@
         if (event.key === " ") {
             if (getComputedStyle(barraSuperiore).display == "flex") {//guarda qual'è il display effettivo indipendentemente da dove è stato assegnato
                 barraSuperiore.style.display = "none";
-                if (sezioneArticoli!=undefined) {
-                        sezioneArticoli.classList.remove("barraPresente");
-                    }
+                if (sezioneArticoli != undefined) {
+                    sezioneArticoli.classList.remove("barraPresente");
                 }
-             else {
+            }
+            else {
                 barraSuperiore.style.display = "flex";
-                if (sezioneArticoli!=undefined) {
-                        sezioneArticoli.classList.add("barraPresente");
-                    }
+                if (sezioneArticoli != undefined) {
+                    sezioneArticoli.classList.add("barraPresente");
+                }
             }
         }
     }
@@ -1056,7 +986,7 @@
         align-items: center;
         /* Allinea gli oggetti verticalmente al centro */
         width: 100%;
-        height: 10vh;
+        height: 120px;
         /* Assicurati che il contenitore occupi tutta la larghezza */
         position: relative;
         z-index: 6;
@@ -1080,13 +1010,15 @@
         width: 100vw;
         height: 80vh;
         /* min-height: 0; */
+        /* border-collapse: collapse; */
     }
 
     #sezioneArticoli>div {
         width: 100%;
         /* height: 80vh; */
     }
-        /* #sezioneArticoli>div.barraPresente {
+
+    /* #sezioneArticoli>div.barraPresente {
         width: 100%;
         height: 70vh;
     } */
@@ -1114,15 +1046,38 @@
         display: flex;
         flex-direction: column;
     }
-    #sezioneArticoli.barraPresente{
-        height: 70vh;
+
+    #sezioneArticoli.barraPresente {
+        height: calc(80vh - 120px);
     }
+
     .prezzo {
         background-image: url("Coez.PNG");
         background-repeat: no-repeat;
         background-size: 100% 100%;
         flex: 1;
         font-size: 5em;
+        text-align: center;
+        /* display: flex;
+        flex: 1; */
+        height: 100%;
+        width: 100%;
+    }
+
+    #centraTemi {
+        display: flex;
+        width: 100vw;
+        height: 80vh;
+        padding-top: 20vh;
+    }
+
+    #centraTemi.barraPresente {
+        height: calc(80vh - 120px);
+    }
+
+    .guardaroba {
+        width: 20%;
+        height: 50%;  
     }
 </style>
 
