@@ -36,31 +36,6 @@
     </style>
 </head>
 <body>
-    listaArticoliNegozio.forEach(articolo => {
-        let contenitoreArticolo = document.createElement("div");
-        contenitoreArticolo.style.position = "relative";
-        contenitoreArticolo.style.width = "100%";
-        contenitoreArticolo.style.aspectRatio = "1 / 1"; // mantiene forma quadrata
-        contenitoreArticolo.classList.add("contenitore-articolo");
-    
-        articolo.corpo = document.createElement("img");
-        articolo.corpo.className = "img-articolo";
-        articolo.corpo.src = articolo.immagine;
-    
-        articolo.corpoCosto = document.createElement("div");
-        articolo.corpoCosto.className = "costo";
-        articolo.corpoCosto.innerText = articolo.costo + "💰";
-    
-        contenitoreArticolo.appendChild(articolo.corpo);
-        contenitoreArticolo.appendChild(articolo.corpoCosto);
-    
-        if (articolo.id.startsWith("potenzia")) {
-            sezionePotenziamenti.appendChild(contenitoreArticolo);
-        } else if (articolo.id.startsWith("potere")) {
-            sezionePoteri.appendChild(contenitoreArticolo);
-        } else {
-            sezioneTemi.appendChild(contenitoreArticolo);
-        }
-    });
+    <input type="range" id="volumeSlider" min="0" max="1" value="50">
 </body>
 </html>

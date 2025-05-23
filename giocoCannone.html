@@ -5,12 +5,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cannon Blast</title>
+    <link rel="icon" href="Coez.PNG">
 </head>
 <script>
     //principali:
-    //TODO: tema principale è natura
-    //TODO: stabilire i prezzi degli oggetti
-    //TODO: finire il for che aggiunge gli oggetti e le loro proprietà
+    //TODO: aggiungere poteri
+    //TODO: aggiungere salvataggio
     //TODO: inserirre counter kill(implementerlo con la barra di riempimento di fine livello)
     //TODO: mettere scritta sopra il tasto del volume con il comando per toglierlo
     //TODO: fare in modo che quando non c'è la barrasuperiore invece di stirare le immagine si creano dei gap tra le immagini(problema con il height %)
@@ -31,13 +31,9 @@
 
     //opzionali:
     //TODO: barra di riempimento di fine livello
-    //TODO: migliorare fisica palle facendo sembrare che rimbalzino
-    //TODO: migliorare fisica delle palle impostando un'altezza a cui tornano giù
     //TODO: se sei in una sezione non permettere di ricliccare sulla sezione
     //TODO: rendere il programma funzionante anche con schermo rimpicciolito
 
-    //A ogni livello deve aumentare la vita delle palle, e il massimo di palle su schermo
-    //In Endless mode la vita e il massimo di palle su schermo delle palle aumenta con il tempo
     "use strict";
     let padre;
     let barraSuperiore;
@@ -49,7 +45,7 @@
         document.addEventListener("keydown", tastoPremuto);
         document.addEventListener("keyup", tastoRilasciato);
         playerMusicaBackground = document.getElementById("musicaBackground");
-        //document.addEventListener("click", function () { playerMusicaBackground.paused && playerMusicaBackground.currentTime == 0 ? playerMusicaBackground.play() : null; musicaSbloccata = true });
+        document.addEventListener("click", function () { playerMusicaBackground.paused && playerMusicaBackground.currentTime == 0 ? playerMusicaBackground.play() : null; musicaSbloccata = true });
     }
 
     let potenziaVelocita = {
@@ -168,6 +164,15 @@
     let obbiettivoKill;
     let sezioneArticoli;
 
+    let temaNaturaAttivo = true;
+    let temaInfernoAttivo = false;
+    let temaCandylandAttivo = false;
+    let temaGalaxyAttivo = false;
+    let temaOGAttivo = false;
+    
+    let potereDannoDoppioSloccato = false;
+    let potereInvisibileSbloccago = false;
+
     // let potereDannoDoppioSbloccato = false;
     // let potereInvisibileSbloccato = false;
     // let temaCandylandSbloccato = false;
@@ -263,6 +268,7 @@
         centraTemi.id = "centraTemi";
         padre.appendChild(centraTemi);
         let natura = document.createElement("img");
+        natura.addEventListener("click", cambioTema);
         natura.className = "guardaroba";
         natura.src = "Coez.PNG";
         centraTemi.appendChild(natura);
@@ -306,9 +312,70 @@
     }
     function sezioneImpostazioni() {
         cambioSezione();
+        let slider = document.createElement("input");
+        padre.appendChild(slider);
+        slider.type = "range";
+        slider.min = 0;
+        slider.max = 100;
+        slider.value = 100;
+        slider.id = "slider";
+        slider.step = 10;
+        slider.addEventListener("input", function(){
+            console.log(this.value/100);
+        playerMusicaBackground.volume = this.value/100;
+        });   
+        // <input type="range" id="volumeSlider" min="0" max="1" value="50">
+       
     }
-    function cambioTema() {
-
+    function cambioTema(event) {
+        console.log("inizio prova:");
+            console.log(event.target);
+            console.log(document.getElementsByClassName("guardaroba")[0]);
+        if (event.target == document.getElementsByClassName("guardaroba")[0]) {
+            console.log("1 Tema");
+            temaNaturaAttivo = true;
+            temaCandylandAttivo = false;
+            temaGalaxyAttivo = false;
+            temaInfernoAttivo = false;
+            temaOGAttivo = false;
+        } else {
+            if (event.target == document.getElementsByClassName("guardaroba")[1]) {
+                console.log("2 Tema");
+                temaNaturaAttivo = false;
+                temaCandylandAttivo = true;
+                temaGalaxyAttivo = false;
+                temaInfernoAttivo = false;
+                temaOGAttivo = false;
+            } else {
+                if (event.target == document.getElementsByClassName("guardaroba")[2]) {
+                    console.log("3 Tema");
+                    temaNaturaAttivo = false;
+                    temaCandylandAttivo = false;
+                    temaGalaxyAttivo = true;
+                    temaInfernoAttivo = false;
+                    temaOGAttivo = false;
+                } else {
+                    if (event.target == document.getElementsByClassName("guardaroba")[3]) {
+                        console.log("4 Tema");
+                        
+                        temaNaturaAttivo = false;
+                        temaCandylandAttivo = false;
+                        temaGalaxyAttivo = false;
+                        temaInfernoAttivo = true;
+                        temaOGAttivo = false;
+                    } else {
+                        if (event.target == document.getElementsByClassName("guardaroba")[4]) {
+                            console.log("5 Tema");
+                            temaNaturaAttivo = false;
+                            temaCandylandAttivo = false;
+                            temaGalaxyAttivo = false;
+                            temaInfernoAttivo = false;
+                            temaOGAttivo = true;
+                        }
+                    }
+                }
+            }
+        }
     }
     function aggiornaScrittaNegozio(articolo) {
         if (articolo.id == "potenziaDanno" || articolo.id == "potenziaVelocita") {
@@ -357,6 +424,12 @@
             if (monete > articolo.costo) {
                 if (!articolo.comprato) {
                     articolo.comprato = true;
+                    if(articolo.id == "potereDannoDoppio"){
+                        let potereDannoDoppioSloccato = true;
+                    }
+                    if(articolo.id == "potereInvisibile"){
+                        let potereInvisibileSbloccago = true;
+                    }
                     monete -= articolo.costo;
                 }
             } else {
@@ -1077,7 +1150,13 @@
 
     .guardaroba {
         width: 20%;
-        height: 50%;  
+        height: 50%;
+    }
+    #slider {
+        position: fixed;
+        width: 200px;
+        left: calc(50vw - 100px);
+        top: 50vh;
     }
 </style>
 
