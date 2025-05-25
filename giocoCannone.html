@@ -9,12 +9,11 @@
 </head>
 <script>
     //principali:
-    //TODO: aggiungere poteri
+    //TODO: stabilire i prezzi dei temi con le gemme
+    //TODO: aggiungere suoni per spari, palle distrutte, vittoria e sconfitta e bottoni cliccati (se troppo complicato fare il suono per il click
     //TODO: aggiungere salvataggio
     //TODO: inserirre counter kill(implementerlo con la barra di riempimento di fine livello)
     //TODO: mettere scritta sopra il tasto del volume con il comando per toglierlo
-    //TODO: fare in modo che quando non c'è la barrasuperiore invece di stirare le immagine si creano dei gap tra le immagini(problema con il height %)
-    //TODO: modificare il tempo a disposizione per completare il livello in base al livello selezionato
     //FIXME: ottimizzare il controllo delle collisioni in modo da fare meno controlli(Spatial Partitioning)
     //BUG: fixare le scritte delle palle che si sovrappongono tra di loro (magari facendo un random che alla generazione delle scritte insierisce zindex alle palle e scritte di 1/2 o 3/4)
 
@@ -45,7 +44,7 @@
         document.addEventListener("keydown", tastoPremuto);
         document.addEventListener("keyup", tastoRilasciato);
         playerMusicaBackground = document.getElementById("musicaBackground");
-        document.addEventListener("click", function () { playerMusicaBackground.paused && playerMusicaBackground.currentTime == 0 ? playerMusicaBackground.play() : null; musicaSbloccata = true });
+        //document.addEventListener("click", function () { playerMusicaBackground.paused && playerMusicaBackground.currentTime == 0 ? playerMusicaBackground.play() : null; musicaSbloccata = true });
     }
 
     let potenziaVelocita = {
@@ -135,13 +134,14 @@
     let timerMuoviPP;
     let timerSvuotaProiettili;
     let timerGemme;
-    let passo = 100; //minimo:20 | massimo: 150 
+    let passo = 25; //minimo:25 | massimo: 150
+    let passoMax = passo;
     let cannone;
-    let danno = 5; //minimo: 5 | massimo: 25
+    let danno = 5; //minimo: 5 | massimo: 30
     let controllaCollisioni = false;
     let fuoriPartita = true; //true all'inizio in modo da evitare che keydown si attivi prima che il cannone sia stato creato
     let schermataGioco;
-    let monete = 0;
+    let monete = 100000;
     let moneteDurantePartita = 0;
     let gemme = 0;
     let gemmeDurantePartita = 0;
@@ -169,9 +169,15 @@
     let temaCandylandAttivo = false;
     let temaGalaxyAttivo = false;
     let temaOGAttivo = false;
-    
-    let potereDannoDoppioSloccato = false;
-    let potereInvisibileSbloccago = false;
+
+    let potereDannoDoppioSbloccato = false;
+    let potereInvisibileSbloccato = false;
+
+    let potere;
+    let potereAttivo = false;
+    let timerPotere;
+    let colpibile = true;
+    let controllaCollisioniPotere = false;
 
     // let potereDannoDoppioSbloccato = false;
     // let potereInvisibileSbloccato = false;
@@ -312,25 +318,46 @@
     }
     function sezioneImpostazioni() {
         cambioSezione();
-        let slider = document.createElement("input");
-        padre.appendChild(slider);
-        slider.type = "range";
-        slider.min = 0;
-        slider.max = 100;
-        slider.value = 100;
-        slider.id = "slider";
-        slider.step = 10;
-        slider.addEventListener("input", function(){
-            console.log(this.value/100);
-        playerMusicaBackground.volume = this.value/100;
-        });   
+        let sliderAudioNome = document.createElement("label");
+        let sliderAudio = document.createElement("input");
+        sliderAudio.type = "range";
+        sliderAudio.min = 0;
+        sliderAudio.max = 100;
+        sliderAudio.value = 100;
+        sliderAudio.className = "sliderAudio";
+        sliderAudio.step = 10;
+        sliderAudio.addEventListener("input", function () {
+            playerMusicaBackground.volume = this.value / 100;
+        });
+        sliderAudioNome.innerText = "volume Audio";
+        sliderAudioNome.className = "sliderAudio";
+
+        let sliderPassoNome = document.createElement("label");
+        let sliderPasso = document.createElement("input");
+        sliderPasso.type = "range";
+        sliderPasso.min = 25;
+        sliderPasso.max = passoMax;
+        sliderPasso.value = passo;
+        sliderPasso.className = "sliderPasso";
+        sliderPasso.step = 5;
+        sliderPasso.addEventListener("input", function () {
+            console.log(this.value);
+            passo = parseInt(this.value);//cambiando il valore di passo con lo slider nelle impostazione il valore diventa una stringa, provocando
+            // playerMusicaBackground.volume = this.value / 100;
+        });
+        sliderPassoNome.innerText = "Velocità cannone";
+        sliderPassoNome.className = "sliderPasso";
+        padre.appendChild(sliderAudioNome);
+        padre.appendChild(sliderAudio);
+        padre.appendChild(sliderPassoNome);
+        padre.appendChild(sliderPasso);
         // <input type="range" id="volumeSlider" min="0" max="1" value="50">
-       
+
     }
     function cambioTema(event) {
         console.log("inizio prova:");
-            console.log(event.target);
-            console.log(document.getElementsByClassName("guardaroba")[0]);
+        console.log(event.target);
+        console.log(document.getElementsByClassName("guardaroba")[0]);
         if (event.target == document.getElementsByClassName("guardaroba")[0]) {
             console.log("1 Tema");
             temaNaturaAttivo = true;
@@ -357,7 +384,7 @@
                 } else {
                     if (event.target == document.getElementsByClassName("guardaroba")[3]) {
                         console.log("4 Tema");
-                        
+
                         temaNaturaAttivo = false;
                         temaCandylandAttivo = false;
                         temaGalaxyAttivo = false;
@@ -404,15 +431,17 @@
         };
     }
     function negozio(articolo) {
-        monete = 1000000;
+
         if (articolo.id == "potenziaVelocita" || articolo.id == "potenziaDanno") {
             if (monete > articolo.costo) {
-                if (articolo.livello < articolo.livelloMax) {
+                if (articolo.livello <= articolo.livelloMax) {
                     if (articolo.id == "potenziaVelocita") {
-                        passo += 5;
+                        passoMax += 5;
                     } else {
-                        danno += 5;
+                        danno += 1;
                     }
+                    console.log("danno: " + danno);
+                    console.log("passo:" + passo);
                     articolo.livello++;
                     articolo.costo += 20;
                     monete -= articolo.costo;
@@ -424,11 +453,11 @@
             if (monete > articolo.costo) {
                 if (!articolo.comprato) {
                     articolo.comprato = true;
-                    if(articolo.id == "potereDannoDoppio"){
-                        let potereDannoDoppioSloccato = true;
+                    if (articolo.id == "potereDannoDoppio") {
+                        potereDannoDoppioSbloccato = true;
                     }
-                    if(articolo.id == "potereInvisibile"){
-                        let potereInvisibileSbloccago = true;
+                    if (articolo.id == "potereInvisibile") {
+                        potereInvisibileSbloccato = true;
                     }
                     monete -= articolo.costo;
                 }
@@ -572,6 +601,7 @@
     function startPartita(event) {
         cambioSezione();
         fuoriPartita = false;
+        potere = undefined;
         console.log(padre.querySelector("nav"));
         padre.querySelector("nav").style.display = "none";
         barraSuperiore.querySelector("div").innerText = countdown;
@@ -651,7 +681,6 @@
             // console.log(listaPalle[i].x);
             // console.log(listaPalle[i].su);
             // console.log(listaPalle[i].y);
-
         }
         collisioniPallaCannone();
         if (controllaCollisioni) {
@@ -666,6 +695,19 @@
                 listaProiettili.splice(i, 1);
                 i--;
             }
+        }
+        //Muovi potere
+        if (potere) {
+            potere.y++;
+            potere.corpo.style.top = potere.y + "px";
+            if (potere.y >= window.innerHeight) {
+                padre.removeChild(potere.corpo);
+                potere = undefined;
+                controllaCollisioniPotere = false;
+            }
+        }
+        if (controllaCollisioniPotere && potere) {
+            collisioniPotereCannone();
         }
     }
     function creaPalle() {
@@ -748,7 +790,7 @@
                     }
                     timerCannoneDestra = window.setInterval(function () {
                         if (cannone.x + passo <= window.innerWidth - dimensioniCannoneWidth) {
-                            cannone.x += passo;
+                            cannone.x += parseInt(passo);
                             cannone.corpo.style.left = cannone.x + "px";
                         }
                     }, 50);
@@ -805,14 +847,48 @@
     }
     //cambiare dimensioni immagini con variabili
     function collisioniPallaCannone() {
-        for (let i = 0; i < listaPalle.length; i++) {
-            if (listaPalle[i].y + dimensioniPalleHeight >= cannone.y + 42) {//42 è l'altezza a cui corrisponde l'inizio del cannone sull'immagine attuale
-                if ((listaPalle[i].x >= cannone.x && listaPalle[i].x <= cannone.x + dimensioniCannoneWidth) || (listaPalle[i].x + dimensioniPalleWidth >= cannone.x && listaPalle[i].x + dimensioniPalleWidth <= cannone.x + dimensioniCannoneWidth)) {
-                    //hittato 
-                    fuoriPartita = true;
-                    sconfitta();
-
+        if (colpibile) {
+            for (let i = 0; i < listaPalle.length; i++) {
+                if (listaPalle[i].y + dimensioniPalleHeight >= cannone.y + 42) {//42 è l'altezza a cui corrisponde l'inizio del cannone sull'immagine attuale
+                    if ((listaPalle[i].x >= cannone.x && listaPalle[i].x <= cannone.x + dimensioniCannoneWidth) || (listaPalle[i].x + dimensioniPalleWidth >= cannone.x && listaPalle[i].x + dimensioniPalleWidth <= cannone.x + dimensioniCannoneWidth)) {
+                        //hittato 
+                        fuoriPartita = true;
+                        sconfitta();
+                    }
                 }
+            }
+        }
+    }
+    function collisioniPotereCannone() {
+        if (potere.y + dimensioniPalleHeight >= cannone.y + 42) {//42 è l'altezza a cui corrisponde l'inizio del cannone sull'immagine attuale
+            if ((potere.x >= cannone.x && potere.x <= cannone.x + dimensioniCannoneWidth) || (potere.x + dimensioniPalleWidth >= cannone.x && potere.x + dimensioniPalleWidth <= cannone.x + dimensioniCannoneWidth)) {
+                console.log("entrato nella condizione");
+                console.log("id: " + potere.id);
+                potereAttivo = true;
+                console.log("danno");
+                console.log(danno);
+                if (potere.id == "dannoDoppio") {
+                    danno = danno * 2;
+                    timerPotere = window.setTimeout(function () { danno = danno / 2; potereAttivo = false; console.log("danno Doppio finito") }, 10000);
+                }
+                console.log(danno);
+
+                console.log("colpibile");
+                console.log(colpibile);
+                if (potere.id == "invisibile") {
+                    cannone.corpo.style.opacity = "0.3";
+                    colpibile = false;
+                    timerPotere = window.setTimeout(function () { colpibile = true; potereAttivo = false; cannone.corpo.style.opacity = "1"; console.log("invisibilità finita") }, 10000);
+                }
+                console.log(colpibile);
+                console.log("TESTTTTTTTTT");
+                console.log(potere.corpo);
+                padre.contains(potere.corpo)
+                // if (padre.contains(potere.corpo)) {
+                padre.removeChild(potere.corpo);
+                controllaCollisioniPotere = false;
+                // }
+                potere = undefined;
             }
         }
     }
@@ -823,6 +899,14 @@
         window.clearInterval(timerGemme);
         window.clearInterval(timerAumentoDifficolta);
         window.clearInterval(timerDurataPartita);
+        window.clearTimeout(timerPotere);
+        if (potereAttivo) {
+            if (colpibile == false) {
+                colpibile = true;
+            } else {
+                danno = danno / 2;
+            }
+        }
         cambioSezione();
         listaPalle.length = 0;
         listaProiettili.length = 0;
@@ -930,6 +1014,50 @@
                     listaPalle[j].vita -= danno;
                     listaPalle[j].scritta.innerText = listaPalle[j].vita;
                     if (listaPalle[j].vita <= 0) {
+                        if (!potereAttivo) {
+                            if (potereDannoDoppioSbloccato || potereInvisibileSbloccato) {
+                                let spawnaPotere = Math.floor(Math.random() * 5);
+                                console.log("inizio test:");
+                                console.log(spawnaPotere);
+                                if (spawnaPotere == 1 && !potere) {
+                                    potere = {
+                                        corpo: document.createElement("img"),
+                                        x: listaPalle[j].x,
+                                        y: listaPalle[j].y,
+                                    }
+                                    let scegliPotereDaSpawnare = Math.floor(Math.random() * 2);
+                                    if (scegliPotereDaSpawnare == 0) {
+                                        if (potereDannoDoppioSbloccato) {
+                                            //dannoDoppio
+                                            potere.id = "dannoDoppio";
+                                            potere.immagine = "x2.png";
+                                        } else {
+                                            //invisibile
+                                            potere.id = "invisibile";
+                                            potere.immagine = "fantasmino.png";
+                                        }
+                                    } else {
+                                        if (potereInvisibileSbloccato) {
+                                            //dannoDoppio
+                                            potere.id = "invisibile";
+                                            potere.immagine = "fantasmino.png";
+                                        } else {
+                                            //invisibile
+                                            potere.id = "dannoDoppio";
+                                            potere.immagine = "x2.png";
+
+                                        }
+                                    }
+                                    console.log("la palla spawna");
+                                    potere.corpo.src = potere.immagine;
+                                    potere.corpo.className = "potere";
+                                    potere.corpo.style.left = potere.x + "px";
+                                    potere.corpo.style.top = potere.y + "px";
+                                    padre.appendChild(potere.corpo);
+                                    controllaCollisioniPotere = true;
+                                }
+                            }
+                        }
                         padre.removeChild(listaPalle[j].corpo);
                         padre.removeChild(listaPalle[j].scritta);
                         listaPalle.splice(j, 1);
@@ -960,8 +1088,31 @@
         /* transition: display 1.3s ease; */
     }
 
-    nav img {
+    /* nav img {
         width: 100%;
+    } */
+    nav div {
+        width: 100%;
+        background-image: url("button.png");
+        background-repeat: no-repeat;
+        background-size: 100% 100%;
+    }
+
+    nav div img {
+        position: relative;
+        left: 180px;
+        top: 50px;
+        height: 150px;
+    }
+
+    #endless {
+        margin:auto;
+        position: relative;
+        /* width: 70%;
+        height: 70%; */
+        left: 100px;
+        box-sizing: border-box; 
+        /* non so se serve */
     }
 
     body>img {
@@ -1152,11 +1303,41 @@
         width: 20%;
         height: 50%;
     }
-    #slider {
+
+    input.sliderAudio {
         position: fixed;
         width: 200px;
         left: calc(50vw - 100px);
         top: 50vh;
+    }
+
+    label.sliderAudio {
+        position: fixed;
+        width: 200px;
+        left: calc(50vw - 100px);
+        top: 48vh;
+        text-align: center;
+    }
+
+    input.sliderPasso {
+        position: fixed;
+        width: 200px;
+        left: calc(50vw - 100px);
+        top: 54vh;
+    }
+
+    label.sliderPasso {
+        position: fixed;
+        width: 200px;
+        left: calc(50vw - 100px);
+        top: 52vh;
+        text-align: center;
+    }
+
+    .potere {
+        position: fixed;
+        height: 200px;
+        width: 200px;
     }
 </style>
 
@@ -1169,11 +1350,18 @@
         <img class="barra" src="diamante-rosa.jpg">
     </div>
     <nav class="menu">
-        <img class="menu" id="endless" src="Coez.PNG" onclick="livelloSelezionato(event)">
-        <img class="menu" src="Coez.PNG" onclick="sezioneLivelli()">
-        <img class="menu" src="Coez.PNG" onclick="sezioneNegozio()">
-        <img class="menu" src="Coez.PNG" onclick="sezioneGuardaroba()">
-        <img class="menu" src="Coez.PNG" onclick="sezioneImpostazioni()">
+        <div class="menu" onclick="livelloSelezionato(event)"><img src="Immagini\endless.png" class="menu" id="endless">
+        </div>
+        <div class="menu" onclick="sezioneLivelli()"><img src="Immagini\livelli.png" class="menu"></div>
+        <div class="menu" onclick="sezioneNegozio()"><img src="Immagini\negozio.png" class="menu"></div>
+        <div class="menu" onclick="sezioneGuardaroba()"><img src="Immagini\gruccia.png" class="menu"></div>
+        <div class="menu" onclick="sezioneImpostazioni()"><img src="Immagini\ingranaggio.png" class="menu"></div>
+
+        <!-- <img class="menu" id="endless" src="button.png" onclick="livelloSelezionato(event)">
+        <img class="menu" src="button Candyland.png" onclick="sezioneLivelli()">
+        <img class="menu" src="button Galaxy.png" onclick="sezioneNegozio()">
+        <img class="menu" src="button Inferno.png" onclick="sezioneGuardaroba()">
+        <img class="menu" src="coez.png" onclick="sezioneImpostazioni()"> -->
     </nav>
 </body>
 
