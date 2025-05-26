@@ -5,15 +5,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cannon Blast</title>
-    <link rel="icon" href="Coez.PNG">
+    <link rel="icon" href="Immagini/bottoni/coez.png">
 </head>
 <script>
     //principali:
-    //TODO: stabilire i prezzi dei temi con le gemme
+    //TODO: modificare immagini palle
+    //TODO: commentare
     //TODO: aggiungere suoni per spari, palle distrutte, vittoria e sconfitta e bottoni cliccati (se troppo complicato fare il suono per il click
     //TODO: aggiungere salvataggio
     //TODO: inserirre counter kill(implementerlo con la barra di riempimento di fine livello)
-    //TODO: mettere scritta sopra il tasto del volume con il comando per toglierlo
     //FIXME: ottimizzare il controllo delle collisioni in modo da fare meno controlli(Spatial Partitioning)
     //BUG: fixare le scritte delle palle che si sovrappongono tra di loro (magari facendo un random che alla generazione delle scritte insierisce zindex alle palle e scritte di 1/2 o 3/4)
 
@@ -24,8 +24,6 @@
     //TODO: sostituire i bottoni immagini con dei button per poterli premere con tab
 
     //estetica:
-    //TODO: abbellire schermata sconfitta
-    //TODO: fare uno sfondo
     //TODO: fare una animazione di scomparsa del menu per renderlo più carino
 
     //opzionali:
@@ -40,16 +38,22 @@
     let musicaSbloccata = false;
     function onload() {
         padre = document.getElementsByTagName("body")[0]//.querySelector("div");
+        padre.style.backgroundImage = "url('Immagini/sfondi/sfondo-natura.png')";
         barraSuperiore = document.getElementById("barra");
         document.addEventListener("keydown", tastoPremuto);
         document.addEventListener("keyup", tastoRilasciato);
         playerMusicaBackground = document.getElementById("musicaBackground");
         //document.addEventListener("click", function () { playerMusicaBackground.paused && playerMusicaBackground.currentTime == 0 ? playerMusicaBackground.play() : null; musicaSbloccata = true });
+        for (let i = 0; i < document.querySelector("nav").querySelectorAll("div").length; i++) {
+            document.querySelector("nav").querySelectorAll("div")[i].style.backgroundImage = "url('Immagini/bottoni/button.png')";
+        }
+        document.getElementById("barraSinistra").style.backgroundImage = "url('Immagini/icone/sound.png')";
     }
 
     let potenziaVelocita = {
         id: "potenziaVelocita",
-        immagine: "Coez.PNG",
+        immagine: "Immagini/icone/scarpa-alata.png",
+        valuta: "Immagini/icone/coin.png",
         costo: 20,
         livello: 1,
         livelloMax: 25
@@ -57,7 +61,8 @@
 
     let potenziaDanno = {
         id: "potenziaDanno",
-        immagine: "Coez.PNG",
+        immagine: "Immagini/icone/esplosione.png",
+        valuta: "Immagini/icone/coin.png",
         costo: 20,
         livello: 1,
         livelloMax: 25
@@ -65,7 +70,8 @@
 
     let potereDannoDoppio = {
         id: "potereDannoDoppio",
-        immagine: "Coez.PNG",
+        immagine: "Immagini/icone/x2.png",
+        valuta: "Immagini/icone/coin.png",
         costo: 150,
         livello: 1,
         comprato: false
@@ -73,35 +79,40 @@
 
     let potereInvisibile = {
         id: "potereInvisibile",
-        immagine: "Coez.PNG",
+        immagine: "Immagini/icone/fantasmino.png",
+        valuta: "Immagini/icone/coin.png",
         costo: 150,
         comprato: false
     };
 
     let temaCandyland = {
         id: "temaCandyland",
-        immagine: "Coez.PNG",
+        immagine: "Immagini/proiettili/proiettile-candyland.png",
+        valuta: "Immagini/icone/diamante.png",
         costo: 300,
         comprato: false
     };
 
     let temaInferno = {
         id: "temaInferno",
-        immagine: "Coez.PNG",
+        immagine: "Immagini/proiettili/proiettile-inferno.png",
+        valuta: "Immagini/icone/diamante.png",
         costo: 500,
         comprato: false
     };
 
     let temaGalaxy = {
         id: "temaGalaxy",
-        immagine: "Coez.PNG",
+        immagine: "Immagini/proiettili/proiettile-galaxy.png",
+        valuta: "Immagini/icone/diamante.png",
         costo: 1000,
         comprato: false
     };
 
     let temaOG = {
         id: "temaOG",
-        immagine: "Coez.PNG",
+        immagine: "Immagini/proiettili/proiettile.png",
+        valuta: "Immagini/icone/diamante.png",
         costo: 2000,
         comprato: false
     };
@@ -129,21 +140,21 @@
     let dimensioniProiettiliHeight = 200;
     let listaPalle = [];
     let listaProiettili = [];
-    let listaGrafichePalle = ["Palla1.png", "Palla2.png", "Palla3.png", "Palla4.png"];
+    let listaGrafichePalle = ["Immagini/palle/palla-natura1.png", "Immagini/palle/palla-natura2.png", "Immagini/palle/palla-natura3.png", "Immagini/palle/palla-natura4.png"];
     let timerCreaPalle;
     let timerMuoviPP;
     let timerSvuotaProiettili;
     let timerGemme;
     let passo = 25; //minimo:25 | massimo: 150
     let passoMax = passo;
-    let cannone;
+    let cannone = { immagine: "Immagini/cannoni/cannone-natura.png" };
     let danno = 5; //minimo: 5 | massimo: 30
     let controllaCollisioni = false;
     let fuoriPartita = true; //true all'inizio in modo da evitare che keydown si attivi prima che il cannone sia stato creato
     let schermataGioco;
     let monete = 100000;
     let moneteDurantePartita = 0;
-    let gemme = 0;
+    let gemme = 100000;
     let gemmeDurantePartita = 0;
     let timerCannoneSinistra;
     let timerCannoneDestra;
@@ -179,6 +190,8 @@
     let colpibile = true;
     let controllaCollisioniPotere = false;
 
+    let immagineProiettile = "Immagini/proiettili/proiettile-natura.png";
+
     // let potereDannoDoppioSbloccato = false;
     // let potereInvisibileSbloccato = false;
     // let temaCandylandSbloccato = false;
@@ -203,6 +216,10 @@
         let livello3 = document.createElement("div");
         let livello4 = document.createElement("div");
         centraLivelli.id = "centraLivelli";
+        livello1.className = "livello";
+        livello2.className = "livello";
+        livello3.className = "livello";
+        livello4.className = "livello";
         livello1.id = "livello1";
         livello2.id = "livello2";
         livello3.id = "livello3";
@@ -249,8 +266,29 @@
 
 
         listaArticoliNegozio.forEach(articolo => {
-            articolo.corpo = document.createElement("div"),
-                articolo.corpo.className = "negozio prezzo";
+            articolo.corpo = document.createElement("div");
+            // temaNaturaAttivo=false;
+            // temaGalaxyAttivo = true;
+            if (temaNaturaAttivo) {
+                articolo.corpo.style.backgroundImage = "url('Immagini/bottoni/button.png')";
+            } else {
+                if (temaCandylandAttivo) {
+                    articolo.corpo.style.backgroundImage = "url('Immagini/bottoni/button-candyland.png')";
+                } else {
+                    if (temaGalaxyAttivo) {
+                        articolo.corpo.style.backgroundImage = "url('Immagini/bottoni/button-galaxy.png')";
+                    } else {
+                        if (temaInfernoAttivo) {
+                            articolo.corpo.style.backgroundImage = "url('Immagini/bottoni/button-inferno.png')";
+                        } else {
+                            if (temaOGAttivo) {
+                                articolo.corpo.style.backgroundImage = "url('Immagini/bottoni/coez.png')";
+                            }
+                        }
+                    }
+                }
+            }
+            articolo.corpo.className = "negozio prezzo";
             articolo.corpo.id = articolo.id;
             articolo.corpo.addEventListener("click", funzioneNegozio(articolo));
             // articolo.corpo.src = "Coez.PNG"; tenere in caso si faccia uno sfondo diverso in base alla sezione
@@ -276,7 +314,8 @@
         let natura = document.createElement("img");
         natura.addEventListener("click", cambioTema);
         natura.className = "guardaroba";
-        natura.src = "Coez.PNG";
+        natura.id = "natura";
+        natura.src = "Immagini/proiettili/proiettile-natura.png";
         centraTemi.appendChild(natura);
         let posizione1 = listaArticoliNegozio.findIndex(articolo => articolo.id === "temaCandyland");
         let posizione2 = listaArticoliNegozio.findIndex(articolo => articolo.id === "temaGalaxy");
@@ -286,28 +325,32 @@
             let candyland = document.createElement("img");
             candyland.addEventListener("click", cambioTema);
             candyland.className = "guardaroba";
-            candyland.src = "Coez.PNG";
+            candyland.id = "candyland";
+            candyland.src = "Immagini/proiettili/proiettile-candyland.png";
             centraTemi.appendChild(candyland);
         }
         if (listaArticoliNegozio[posizione2].comprato == true) {
             let galaxy = document.createElement("img");
             galaxy.addEventListener("click", cambioTema);
             galaxy.className = "guardaroba";
-            galaxy.src = "Coez.PNG";
+            galaxy.id = "galaxy";
+            galaxy.src = "Immagini/proiettili/proiettile-galaxy.png";
             centraTemi.appendChild(galaxy);
         }
         if (listaArticoliNegozio[posizione3].comprato == true) {
             let inferno = document.createElement("img");
             inferno.addEventListener("click", cambioTema);
             inferno.className = "guardaroba";
-            inferno.src = "Coez.PNG";
+            inferno.id = "inferno";
+            inferno.src = "Immagini/proiettili/proiettile-inferno.png";
             centraTemi.appendChild(inferno);
         }
         if (listaArticoliNegozio[posizione4].comprato == true) {
             let og = document.createElement("img");
             og.addEventListener("click", cambioTema);
             og.className = "guardaroba";
-            og.src = "Coez.PNG";
+            og.id = "og";
+            og.src = "Immagini/proiettili/proiettile.png";
             centraTemi.appendChild(og);
         }
 
@@ -358,46 +401,80 @@
         console.log("inizio prova:");
         console.log(event.target);
         console.log(document.getElementsByClassName("guardaroba")[0]);
-        if (event.target == document.getElementsByClassName("guardaroba")[0]) {
-            console.log("1 Tema");
+        if (event.target.id == "natura") {
+            console.log("tema: natura");
             temaNaturaAttivo = true;
             temaCandylandAttivo = false;
             temaGalaxyAttivo = false;
             temaInfernoAttivo = false;
             temaOGAttivo = false;
+            cannone.immagine = "Immagini/cannoni/cannone-natura.png";
+            immagineProiettile = "Immagini/proiettili/proiettile-natura.png";
+            for (let i = 0; i < document.querySelector("nav").querySelectorAll("div").length; i++) {
+                document.querySelector("nav").querySelectorAll("div")[i].style.backgroundImage = "url('Immagini/bottoni/button.png')";
+            }
+            padre.style.backgroundImage = "url('Immagini/sfondi/sfondo-natura.png')";
+            listaGrafichePalle = ["Immagini/palle/palla-natura1.png", "Immagini/palle/palla-natura2.png", "Immagini/palle/palla-natura3.png", "Immagini/palle/palla-natura4.png"];
         } else {
-            if (event.target == document.getElementsByClassName("guardaroba")[1]) {
-                console.log("2 Tema");
+            if (event.target.id == "candyland") {
+                console.log("tema: candyland");
                 temaNaturaAttivo = false;
                 temaCandylandAttivo = true;
                 temaGalaxyAttivo = false;
                 temaInfernoAttivo = false;
                 temaOGAttivo = false;
+                cannone.immagine = "Immagini/cannoni/cannone-candyland.png";
+                immagineProiettile = "Immagini/proiettili/proiettile-candyland.png";
+                for (let i = 0; i < document.querySelector("nav").querySelectorAll("div").length; i++) {
+                    document.querySelector("nav").querySelectorAll("div")[i].style.backgroundImage = "url('Immagini/bottoni/button-candyland.png')";
+                }
+                padre.style.backgroundImage = "url('Immagini/sfondi/sfondo-candyland.png')";
+                listaGrafichePalle = ["Immagini/palle/palla-candyland1.png", "Immagini/palle/palla-candyland2.png", "Immagini/palle/palla-candyland3.png", "Immagini/palle/palla-candyland4.png"];
             } else {
-                if (event.target == document.getElementsByClassName("guardaroba")[2]) {
-                    console.log("3 Tema");
+                if (event.target.id == "galaxy") {
+                    console.log("tema: galaxy");
                     temaNaturaAttivo = false;
                     temaCandylandAttivo = false;
                     temaGalaxyAttivo = true;
                     temaInfernoAttivo = false;
                     temaOGAttivo = false;
+                    cannone.immagine = "Immagini/cannoni/cannone-galaxy.png";
+                    immagineProiettile = "Immagini/proiettili/proiettile-galaxy.png";
+                    for (let i = 0; i < document.querySelector("nav").querySelectorAll("div").length; i++) {
+                        document.querySelector("nav").querySelectorAll("div")[i].style.backgroundImage = "url('Immagini/bottoni/button-galaxy.png')";
+                    }
+                    padre.style.backgroundImage = "url('Immagini/sfondi/sfondo-galaxy.png')";
+                    listaGrafichePalle = ["Immagini/palle/palla-galaxy1.png", "Immagini/palle/palla-galaxy2.png", "Immagini/palle/palla-galaxy3.png", "Immagini/palle/palla-galaxy4.png"];
                 } else {
-                    if (event.target == document.getElementsByClassName("guardaroba")[3]) {
-                        console.log("4 Tema");
-
+                    if (event.target.id == "inferno") {
+                        console.log("tema: inferno");
                         temaNaturaAttivo = false;
                         temaCandylandAttivo = false;
                         temaGalaxyAttivo = false;
                         temaInfernoAttivo = true;
                         temaOGAttivo = false;
+                        cannone.immagine = "Immagini/cannoni/cannone-inferno.png";
+                        immagineProiettile = "Immagini/proiettili/proiettile-inferno.png";
+                        for (let i = 0; i < document.querySelector("nav").querySelectorAll("div").length; i++) {
+                            document.querySelector("nav").querySelectorAll("div")[i].style.backgroundImage = "url('Immagini/bottoni/button-inferno.png')";
+                        }
+                        padre.style.backgroundImage = "url('Immagini/sfondi/sfondo-inferno.png')";
+                        listaGrafichePalle = ["Immagini/palle/palla-inferno1.png", "Immagini/palle/palla-inferno2.png", "Immagini/palle/palla-inferno3.png", "Immagini/palle/palla-inferno4.png"];
                     } else {
-                        if (event.target == document.getElementsByClassName("guardaroba")[4]) {
-                            console.log("5 Tema");
+                        if (event.target.id == "og") {
+                            console.log("tema: og");
                             temaNaturaAttivo = false;
                             temaCandylandAttivo = false;
                             temaGalaxyAttivo = false;
                             temaInfernoAttivo = false;
                             temaOGAttivo = true;
+                            cannone.immagine = "Immagini/cannoni/cannone.png";
+                            immagineProiettile = "Immagini/proiettili/proiettile.png";
+                            for (let i = 0; i < document.querySelector("nav").querySelectorAll("div").length; i++) {
+                                document.querySelector("nav").querySelectorAll("div")[i].style.backgroundImage = "url('Immagini/bottoni/coez.png')";
+                            }
+                            padre.style.backgroundImage = "";
+                            listaGrafichePalle = ["Immagini/palle/palla1.png", "Immagini/palle/palla2.png", "Immagini/palle/palla3.png", "Immagini/palle/palla4.png"];
                         }
                     }
                 }
@@ -413,15 +490,15 @@
             // console.log(articolo.livelloMax);
             // console.log(articolo.livello<articolo.livelloMax);
             if (articolo.livello < articolo.livelloMax) {
-                articolo.corpo.innerText = "costo: " + articolo.costo + " livello: " + articolo.livello;
+                articolo.corpo.innerHTML = "<img src=" + articolo.immagine + "><label>costo: " + articolo.costo + "<img src=" + articolo.valuta + "> livello: " + articolo.livello + "</label>";
             } else {
-                articolo.corpo.innerText = "Livello Massimo";
+                articolo.corpo.innerHTML = "<img src=" + articolo.immagine + "><label>Livello Massimo</label>";
             }
         } else {
             if (articolo.comprato) {
-                articolo.corpo.innerText = "Sold out";
+                articolo.corpo.innerHTML = "<img src=" + articolo.immagine + "><label>Sold out</label>";
             } else {
-                articolo.corpo.innerText = "costo: " + articolo.costo;
+                articolo.corpo.innerHTML = "<img src=" + articolo.immagine + "><label>costo: " + articolo.costo + "<img src=" + articolo.valuta + "></label>";
             }
         }
     }
@@ -445,66 +522,86 @@
                     articolo.livello++;
                     articolo.costo += 20;
                     monete -= articolo.costo;
+
                 }
             } else {
                 alert("monete insufficienti");//cambiare la scritta per 1 secondo per poi tornare normale
             }
         } else {
-            if (monete > articolo.costo) {
-                if (!articolo.comprato) {
-                    articolo.comprato = true;
-                    if (articolo.id == "potereDannoDoppio") {
-                        potereDannoDoppioSbloccato = true;
+            if (articolo.id == "potereDannoDoppio" || articolo.id == "potereInvisibile") {
+                if (monete > articolo.costo) {
+                    if (!articolo.comprato) {
+                        articolo.comprato = true;
+                        if (articolo.id == "potereDannoDoppio") {
+                            potereDannoDoppioSbloccato = true;
+                        }
+                        if (articolo.id == "potereInvisibile") {
+                            potereInvisibileSbloccato = true;
+                        }
+                        monete -= articolo.costo;
                     }
-                    if (articolo.id == "potereInvisibile") {
-                        potereInvisibileSbloccato = true;
-                    }
-                    monete -= articolo.costo;
+                } else {
+                    alert("monete insufficienti");
                 }
             } else {
-                alert("monete insufficienti");
+                if (gemme > articolo.costo) {
+                    if (!articolo.comprato) {
+                        articolo.comprato = true;
+                        gemme -= articolo.costo;
+                    }
+                } else {
+                    alert("gemme insufficienti");
+                }
             }
         }
         aggiornaScrittaNegozio(articolo);
-        //     potenziaVelocita,
-        //     potenziaDanno,
-        //     potereDannoDoppio,
-        //     potereInvisibile,
-        //     temaInferno,
-        //     temaCandyland,
-        //     temaGalaxy,
-        //     temaOG
+        document.getElementById("coin").innerText = monete;
+        document.getElementById("diamante").innerText = gemme;
     }
     function creaSchermata() {
         schermataGioco = document.createElement("div");
-        schermataGioco.style.textAlign = "center";
-        schermataGioco.style.position = "fixed";
-        schermataGioco.style.zIndex = 3;
-        schermataGioco.style.marginTop = 10 + "vh";
-        schermataGioco.style.marginLeft = 25 + "vw";
-        schermataGioco.style.height = 50 + "vh";
-        schermataGioco.style.width = 50 + "vw";
+        schermataGioco.id = "schermataGioco";
+        if (temaNaturaAttivo) {
+            schermataGioco.style.backgroundImage = "url('Immagini/bottoni/button.png')";
+        } else {
+            if (temaCandylandAttivo) {
+                schermataGioco.style.backgroundImage = "url('Immagini/bottoni/button-candyland.png')";
+            } else {
+                if (temaGalaxyAttivo) {
+                    schermataGioco.style.backgroundImage = "url('Immagini/bottoni/button-galaxy.png')";
+                } else {
+                    if (temaInfernoAttivo) {
+                        schermataGioco.style.backgroundImage = "url('Immagini/bottoni/button-inferno.png')";
+                    } else {
+                        if (temaOGAttivo) {
+                            schermataGioco.style.backgroundImage = "url('Immagini/bottoni/coez.png')";
+                        }
+                    }
+                }
+            }
+        }
         padre.appendChild(schermataGioco);
     }
     function livelloSelezionato(event) {
+        console.log("GAY");
         console.log(event.target);
         console.log(event.target.innerText == "riprova");
-        console.log(document.getElementById("endless") == event.target || (modalita == "endless" && event.target.innerText == "riprova"));
-        if (document.getElementById("endless") == event.target || (modalita == "endless" && event.target.innerText == "riprova")) {
+        console.log(event.target.classList.contains("endless") || (modalita == "endless" && event.target.innerText == "riprova"));
+        if (event.target.classList.contains("endless") || (modalita == "endless" && event.target.innerText == "riprova")) {
             massimoPalle = 3;
             vitaPalle = 200;
             countdown = 0;
-            if (document.getElementById("endless") == event.target) {
+            if (event.target.classList.contains("endless")) {
                 modalita = "";
             }
             if (modalita != "endless") {
                 cambioSezione();//forse meglio non metterlo
                 creaSchermata();
-                schermataGioco.innerHTML = "<h2>Endless Mode</h2> <p>Record: 531408 palle distrutte/tempo sopravvissuto <button>Gioca</button>";
+                schermataGioco.innerHTML = "<h2>Endless Mode</h2> <p>Record:" + recordEndless + "</p><button>Gioca</button>";
                 schermataGioco.querySelector("button").addEventListener("click", startPartita)//mhh me puzza
             } else {
                 startPartita();
-                barraSuperiore.querySelector("div").innerText = countdown;
+                document.getElementById("barraCentro").innerText = countdown;
             }
             modalita = "endless";
             console.log("difficoltà endless");
@@ -520,12 +617,12 @@
                 if (modalita != "livello1") {
                     cambioSezione();//forse meglio non metterlo
                     creaSchermata();
-                    schermataGioco.innerHTML = "<h2>Livello 1</h2> <p>Record: 5318 record tempo<button>Gioca</button><button>Indietro</button>";
+                    schermataGioco.innerHTML = "<h2>Livello 1</h2> <p>Record:" + recordLivello1 + "</p><button>Gioca</button><button>Indietro</button>";
                     schermataGioco.querySelectorAll("button")[0].addEventListener("click", startPartita);
                     schermataGioco.querySelectorAll("button")[1].addEventListener("click", sezioneLivelli);//mhh me puzza
                 } else {
                     startPartita();
-                    barraSuperiore.querySelector("div").innerText = countdown;
+                    document.getElementById("barraCentro").innerText = countdown;
                 }
                 modalita = "livello1";
                 console.log("difficoltà 1");
@@ -541,12 +638,12 @@
                     if (modalita != "livello2") {
                         cambioSezione();//forse meglio non metterlo
                         creaSchermata();
-                        schermataGioco.innerHTML = "<h2>Livello 2</h2> <p>Record: 5318 record tempo<button>Gioca</button><button>Indietro</button>";
+                        schermataGioco.innerHTML = "<h2>Livello 2</h2> <p>Record:" + recordLivello2 + "</p><button>Gioca</button><button>Indietro</button>";
                         schermataGioco.querySelectorAll("button")[0].addEventListener("click", startPartita);
                         schermataGioco.querySelectorAll("button")[1].addEventListener("click", sezioneLivelli);//mhh me puzza
                     } else {
                         startPartita();
-                        barraSuperiore.querySelector("div").innerText = countdown;
+                        document.getElementById("barraCentro").innerText = countdown;
                     }
                     modalita = "livello2";
                     console.log("difficoltà 2");
@@ -562,12 +659,12 @@
                         if (modalita != "livello3") {
                             cambioSezione();//forse meglio non metterlo
                             creaSchermata();
-                            schermataGioco.innerHTML = "<h2>Livello 3</h2> <p>Record: 5318 record tempo<button>Gioca</button><button>Indietro</button>";
+                            schermataGioco.innerHTML = "<h2>Livello 3</h2> <p>Record:" + recordLivello3 + "</p><button>Gioca</button><button>Indietro</button>";
                             schermataGioco.querySelectorAll("button")[0].addEventListener("click", startPartita);
                             schermataGioco.querySelectorAll("button")[1].addEventListener("click", sezioneLivelli);//mhh me puzza
                         } else {
                             startPartita();
-                            barraSuperiore.querySelector("div").innerText = countdown;
+                            document.getElementById("barraCentro").innerText = countdown;
                         }
                         modalita = "livello3";
                         console.log("difficoltà 3");
@@ -583,12 +680,12 @@
                             if (modalita != "livello4") {
                                 cambioSezione();//forse meglio non metterlo
                                 creaSchermata();
-                                schermataGioco.innerHTML = "<h2>Livello 4</h2> <p>Record: 5318 record tempo<button>Gioca</button><button>Indietro</button>";
+                                schermataGioco.innerHTML = "<h2>Livello 4</h2> <p>Record:" + recordLivello4 + "</p><button>Gioca</button><button>Indietro</button>";
                                 schermataGioco.querySelectorAll("button")[0].addEventListener("click", startPartita);
                                 schermataGioco.querySelectorAll("button")[1].addEventListener("click", sezioneLivelli);//mhh me puzza
                             } else {
                                 startPartita();
-                                barraSuperiore.querySelector("div").innerText = countdown;
+                                document.getElementById("barraCentro").innerText = countdown;
                             }
                             modalita = "livello4";
                             console.log("difficoltà 4");
@@ -604,17 +701,17 @@
         potere = undefined;
         console.log(padre.querySelector("nav"));
         padre.querySelector("nav").style.display = "none";
-        barraSuperiore.querySelector("div").innerText = countdown;
+        document.getElementById("barraCentro").innerText = countdown;
         if (modalita == "endless") {
             timerAumentoDifficolta = window.setInterval(aumentaDifficolta, 20000);//serve solo nella modalità endless
             timerDurataPartita = window.setInterval(function () {//serve solo nella modalità a livelli
                 countdown++;
-                barraSuperiore.querySelector("div").innerText = countdown;
+                document.getElementById("barraCentro").innerText = countdown;
             }, 1000);
         } else {
             timerDurataPartita = window.setInterval(function () {//serve solo nella modalità a livelli
                 countdown--;
-                barraSuperiore.querySelector("div").innerText = countdown;
+                document.getElementById("barraCentro").innerText = countdown;
                 if (countdown == 0) {
                     fuoriPartita = true;
                     sconfitta();
@@ -634,10 +731,13 @@
     }
     function creaCannone() {
         let corpoCannone = document.createElement("img"); //crea il cannone
-        corpoCannone.src = "Cannone1.png";
-        cannone = { x: window.innerWidth / 2 - dimensioniCannoneWidth / 2, y: window.innerHeight - dimensioniCannoneHeight, corpo: corpoCannone };
+        let immagineTemporanea = cannone.immagine;
+        cannone = { x: window.innerWidth / 2 - dimensioniCannoneWidth / 2, y: window.innerHeight - dimensioniCannoneHeight, corpo: corpoCannone, immagine: immagineTemporanea };
         cannone.corpo.style.left = cannone.x + "px";
         cannone.corpo.style.top = cannone.y + "px";
+        corpoCannone.src = cannone.immagine;
+        corpoCannone.style.width = dimensioniCannoneWidth + "px";
+        corpoCannone.style.height = dimensioniCannoneHeight + "px";
     }
     function muoviPP() {
         //muovi Palle
@@ -725,6 +825,8 @@
                 corpo: document.createElement("img"),
                 scritta: document.createElement("p")
             }
+            palla.corpo.style.width = dimensioniPalleWidth + "px";
+            palla.corpo.style.height = dimensioniPalleHeight + "px";
             //elementi che dipendono da altri vanno creati dopo
             palla.x = palla.destra ? 0 : window.innerWidth - dimensioniPalleWidth, //o tutto sinistra o tutto destra, dipende dalla proprietà destra all'inizio
                 palla.corpo.style.left = palla.x + "px";
@@ -746,8 +848,10 @@
     }
     function creaProiettile() {
         if (!fuoriPartita) {
-            let proiettile = { y: cannone.y - dimensioniProiettiliHeight, x: cannone.x, corpo: document.createElement("img") };
-            proiettile.corpo.src = "Proiettile.png";
+            let proiettile = { y: cannone.y - dimensioniProiettiliHeight, x: cannone.x, corpo: document.createElement("img"), immagine: immagineProiettile };
+            proiettile.corpo.src = proiettile.immagine;
+            proiettile.corpo.style.width = dimensioniProiettiliWidth + "px";
+            proiettile.corpo.style.height = dimensioniProiettiliHeight + "px";
             listaProiettili.push(proiettile);
             proiettile.corpo.style.top = proiettile.y + "px";
             proiettile.corpo.style.left = proiettile.x + "px";
@@ -759,10 +863,11 @@
         if (event.key === "Control" && musicaSbloccata) {
             if (playerMusicaBackground.paused) {
                 playerMusicaBackground.play();
-                document.getElementById("barraSinistra").src = "sound.png";
+                document.getElementById("barraSinistra").style.backgroundImage = "url('Immagini/icone/sound.png')";
             } else {
                 playerMusicaBackground.pause();
-                document.getElementById("barraSinistra").src = "mute.png";
+                console.log("GAYYYY");
+                document.getElementById("barraSinistra").style.backgroundImage = "url('Immagini/icone/mute.png')";
             }
         }
         if (!fuoriPartita) {
@@ -849,7 +954,7 @@
     function collisioniPallaCannone() {
         if (colpibile) {
             for (let i = 0; i < listaPalle.length; i++) {
-                if (listaPalle[i].y + dimensioniPalleHeight >= cannone.y + 42) {//42 è l'altezza a cui corrisponde l'inizio del cannone sull'immagine attuale
+                if (listaPalle[i].y + dimensioniPalleHeight >= cannone.y) {//42 è l'altezza a cui corrisponde l'inizio del cannone sull'immagine attuale
                     if ((listaPalle[i].x >= cannone.x && listaPalle[i].x <= cannone.x + dimensioniCannoneWidth) || (listaPalle[i].x + dimensioniPalleWidth >= cannone.x && listaPalle[i].x + dimensioniPalleWidth <= cannone.x + dimensioniCannoneWidth)) {
                         //hittato 
                         fuoriPartita = true;
@@ -860,7 +965,7 @@
         }
     }
     function collisioniPotereCannone() {
-        if (potere.y + dimensioniPalleHeight >= cannone.y + 42) {//42 è l'altezza a cui corrisponde l'inizio del cannone sull'immagine attuale
+        if (potere.y + dimensioniPalleHeight >= cannone.y) {//42 è l'altezza a cui corrisponde l'inizio del cannone sull'immagine attuale
             if ((potere.x >= cannone.x && potere.x <= cannone.x + dimensioniCannoneWidth) || (potere.x + dimensioniPalleWidth >= cannone.x && potere.x + dimensioniPalleWidth <= cannone.x + dimensioniCannoneWidth)) {
                 console.log("entrato nella condizione");
                 console.log("id: " + potere.id);
@@ -913,7 +1018,7 @@
         padre.querySelector("nav").style.display = "";
 
         punteggioAttuale = countdown;
-        barraSuperiore.querySelector("div").innerText = "";
+        document.getElementById("barraCentro").innerText = "";
 
         if (modalita == "endless" && punteggioAttuale > recordEndless) {
             recordEndless = punteggioAttuale;
@@ -960,6 +1065,8 @@
         moneteDurantePartita = 0;
         gemmeDurantePartita = 0;
         kill = 0;
+        document.getElementById("coin").innerText = monete;
+        document.getElementById("diamante").innerText = gemme;
     }
     function schermataVittoria() {
         creaSchermata();
@@ -975,6 +1082,8 @@
         gemme += gemmeDurantePartita;//forse sposta ad un timer cosi da aggiornare in tempo reale
         moneteDurantePartita = 0;
         gemmeDurantePartita = 0;
+        document.getElementById("coin").innerText = monete;
+        document.getElementById("diamante").innerText = gemme;
     }
     function schermataSconfitta() {
         creaSchermata();
@@ -1030,21 +1139,21 @@
                                         if (potereDannoDoppioSbloccato) {
                                             //dannoDoppio
                                             potere.id = "dannoDoppio";
-                                            potere.immagine = "x2.png";
+                                            potere.immagine = "Immagini/icone/x2.png";
                                         } else {
                                             //invisibile
                                             potere.id = "invisibile";
-                                            potere.immagine = "fantasmino.png";
+                                            potere.immagine = "Immagini/icone/fantasmino.png";
                                         }
                                     } else {
                                         if (potereInvisibileSbloccato) {
                                             //dannoDoppio
                                             potere.id = "invisibile";
-                                            potere.immagine = "fantasmino.png";
+                                            potere.immagine = "Immagini/icone/fantasmino.png";
                                         } else {
                                             //invisibile
                                             potere.id = "dannoDoppio";
-                                            potere.immagine = "x2.png";
+                                            potere.immagine = "Immagini/icone/x2.png";
 
                                         }
                                     }
@@ -1072,6 +1181,8 @@
 </script>
 <style>
     body {
+        background-repeat: no-repeat;
+        background-size: 100% 100%;
         background-color: green;
         margin: 0;
         height: 100vh;
@@ -1083,7 +1194,6 @@
         bottom: 0;
         height: 20vh;
         width: 100vw;
-        background-color: brown;
         display: flex;
         /* transition: display 1.3s ease; */
     }
@@ -1092,27 +1202,50 @@
         width: 100%;
     } */
     nav div {
+        display: flex;
+        align-items: center;
+        justify-content: center;
         width: 100%;
-        background-image: url("button.png");
+        /* background-image: url("Immagini/bottoni/button.png"); */
         background-repeat: no-repeat;
         background-size: 100% 100%;
+        /* padding-left: 100%;
+        padding-right: 100%; */
     }
 
     nav div img {
-        position: relative;
-        left: 180px;
-        top: 50px;
         height: 150px;
     }
 
-    #endless {
-        /* margin:auto; */
-        position: relative;
-        /* width: 70%;
-        height: 70%; */
-        left: 100px;
-        box-sizing: border-box; 
-        /* non so se serve */
+    /* #infinito {
+        height: 250px;
+         padding-inline: 100%; 
+    } */
+    nav div:first-of-type img {
+        height: 250px;
+    }
+
+    #schermataGioco {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background-repeat: no-repeat;
+        background-size: 100% 100%;
+        text-align: center;
+        position: fixed;
+        z-index: 3;
+        margin-top: 10vh;
+        margin-left: 25vw;
+        height: 50vh;
+        width: 50vw;
+    }
+
+    #schermataGioco button {
+        width: 100px;
+        padding: 20px;
+        margin-top: 20px;
+        border-radius: 1rem;
     }
 
     body>img {
@@ -1128,51 +1261,23 @@
         text-shadow: 2px 2px 0 white;
     }
 
-    body>div:not(#centraLivelli):not(.barra):not(.negozio) {
-        background-color: aqua;
-        /* display: inline-block; */
-    }
-
     #centraLivelli {
         display: flex;
         justify-content: space-evenly;
         padding-top: 25vh;
     }
 
-    #livello1 {
-        background-color: pink;
+    .livello {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 10em;
+        background-image: url("Immagini/bottoni/pilastro.png");
+        background-repeat: no-repeat;
+        background-size: 100% 100%;
+        text-align: center;
         width: 200PX;
         height: 200PX;
-        /* position: fixed;
-        left: 10vw;
-        top: calc(50vh - 100px); */
-    }
-
-    #livello2 {
-        background-color: purple;
-        width: 200PX;
-        height: 200PX;
-        /* position: fixed;
-        left: 30vw;
-        top: calc(50vh - 100px); */
-    }
-
-    #livello3 {
-        background-color: red;
-        width: 200PX;
-        height: 200PX;
-        /* position: fixed;
-        left: 50vw;
-        top: calc(50vh - 100px); */
-    }
-
-    #livello4 {
-        background-color: black;
-        width: 200PX;
-        height: 200PX;
-        /* position: fixed;
-        left: 70vw;
-        top: calc(50vh - 100px); */
     }
 
     /* #barra {
@@ -1196,7 +1301,39 @@
         position: absolute;
         left: 100%;
     } */
-    img.barra {
+    #barraSinistra {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 250%;
+        /* background-image: url("Immagini/icone/sound.png"); */
+        background-repeat: no-repeat;
+        background-size: 100% 100%;
+        height: 100px;
+        width: 100px;
+        font-size: 250%;
+    }
+
+    #coin {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 250%;
+        background-image: url("Immagini/icone/coin.png");
+        background-repeat: no-repeat;
+        background-size: 100% 100%;
+        height: 100px;
+        width: 100px;
+    }
+
+    #diamante {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 250%;
+        background-image: url("Immagini/icone/diamante.png");
+        background-repeat: no-repeat;
+        background-size: 100% 100%;
         height: 100px;
         width: 100px;
     }
@@ -1230,7 +1367,6 @@
 
     #sezioneArticoli {
         display: flex;
-        background-color: rgb(210, 201, 30);
         width: 100vw;
         height: 80vh;
         /* min-height: 0; */
@@ -1254,19 +1390,16 @@
     } */
 
     #sezionePotenziamenti {
-        background-color: chocolate;
         display: flex;
         flex-direction: column;
     }
 
     #sezionePoteri {
-        background-color: rgb(210, 30, 126);
         display: flex;
         flex-direction: column;
     }
 
     #sezioneTemi {
-        background-color: rgb(30, 210, 54);
         display: flex;
         flex-direction: column;
     }
@@ -1276,8 +1409,11 @@
     }
 
     .prezzo {
-        background-image: url("Coez.PNG");
+        display: flex;
+        align-items: center;
+        justify-content: center;
         background-repeat: no-repeat;
+        flex-direction: column;
         background-size: 100% 100%;
         flex: 1;
         font-size: 5em;
@@ -1339,23 +1475,35 @@
         height: 200px;
         width: 200px;
     }
+
+    .prezzo img {
+        height: 100px;
+    }
+
+    .prezzo label img {
+        position: relative;
+        top: 20px;
+    }
 </style>
 
 <body onload="onload()">
     <audio src="Green Day - American Idiot.mp3" id="musicaBackground" loop></audio>
     <div class="barra" id="barra">
-        <img class="barra" id="barraSinistra" src="sound.png">
-        <div class="barra" id="barraCentro">contatore</div>
-        <img class="barra" src="Moneta-da-7E-befunky-lagazzettadiviareggio.it_-1024x576.jpg">
-        <img class="barra" src="diamante-rosa.jpg">
+        <div class="barra" id="barraSinistra">CTRL</div>
+        <!-- <img class="barra" id="barraSinistra" src="Immagini/icone/sound.png"> -->
+        <div class="barra" id="barraCentro"></div>
+        <div class="barra" id="coin">0</div>
+        <div class="barra" id="diamante">0</div>
+        <!-- <img class="barra" src="Immagini/icone/coin.png">
+        <img class="barra" src="Immagini/icone/diamante.png"> -->
     </div>
     <nav class="menu">
-        <div class="menu" onclick="livelloSelezionato(event)"><img src="Immagini\endless.png" class="menu" id="endless">
-        </div>
-        <div class="menu" onclick="sezioneLivelli()"><img src="Immagini\livelli.png" class="menu"></div>
-        <div class="menu" onclick="sezioneNegozio()"><img src="Immagini\negozio.png" class="menu"></div>
-        <div class="menu" onclick="sezioneGuardaroba()"><img src="Immagini\gruccia.png" class="menu"></div>
-        <div class="menu" onclick="sezioneImpostazioni()"><img src="Immagini\ingranaggio.png" class="menu"></div>
+        <div class="menu endless" onclick="livelloSelezionato(event)"><img src="Immagini/icone/infinito.png"
+                class="menu endless"></div>
+        <div class="menu" onclick="sezioneLivelli()"><img src="Immagini/icone/livelli.png" class="menu"></div>
+        <div class="menu" onclick="sezioneNegozio()"><img src="Immagini/icone/negozio.png" class="menu"></div>
+        <div class="menu" onclick="sezioneGuardaroba()"><img src="Immagini/icone/gruccia.png" class="menu"></div>
+        <div class="menu" onclick="sezioneImpostazioni()"><img src="Immagini/icone/ingranaggio.png" class="menu"></div>
 
         <!-- <img class="menu" id="endless" src="button.png" onclick="livelloSelezionato(event)">
         <img class="menu" src="button Candyland.png" onclick="sezioneLivelli()">
