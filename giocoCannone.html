@@ -11,6 +11,8 @@
     //principali:
     //TODO: modificare immagini palle
     //TODO: commentare
+    //TODO: ingrandire gli slider in impostazioni
+    
     //TODO: aggiungere suoni per spari, palle distrutte, vittoria e sconfitta e bottoni cliccati (se troppo complicato fare il suono per il click
     //TODO: aggiungere salvataggio
     //TODO: inserirre counter kill(implementerlo con la barra di riempimento di fine livello)
@@ -169,7 +171,7 @@
     let recordLivello1 = 0;
     let recordLivello2 = 0;
     let recordLivello3 = 0;
-    let recordLivello4 = 0;
+    let recordLivello = 0;
     let punteggioAttuale = 0;
     let kill = 0;
     let obbiettivoKill;
@@ -301,11 +303,15 @@
                     sezionePoteri.appendChild(articolo.corpo);
                 } else {
                     aggiornaScrittaNegozio(articolo)
+
+500
                     sezioneTemi.appendChild(articolo.corpo);
                 }
             }
         });
     }
+
+500
     function sezioneGuardaroba() {
         cambioSezione();
         let centraTemi = document.createElement("div");
@@ -1242,10 +1248,12 @@
     }
 
     #schermataGioco button {
-        width: 100px;
         padding: 20px;
         margin-top: 20px;
         border-radius: 1rem;
+        font-size: 2em;
+        text-align: center;
+
     }
 
     body>img {
@@ -1416,7 +1424,7 @@
         flex-direction: column;
         background-size: 100% 100%;
         flex: 1;
-        font-size: 5em;
+        font-size: 3rem;
         text-align: center;
         /* display: flex;
         flex: 1; */
@@ -1427,12 +1435,8 @@
     #centraTemi {
         display: flex;
         width: 100vw;
-        height: 80vh;
+        height: 75vh;
         padding-top: 20vh;
-    }
-
-    #centraTemi.barraPresente {
-        height: calc(80vh - 120px);
     }
 
     .guardaroba {
@@ -1472,17 +1476,31 @@
 
     .potere {
         position: fixed;
-        height: 200px;
-        width: 200px;
+        height: 15vh;
+        width: 8vw;
     }
 
     .prezzo img {
-        height: 100px;
+        height: 6vh;
     }
 
     .prezzo label img {
         position: relative;
-        top: 20px;
+        top: 1vh;
+        height: 5vh;
+    }
+    h2 {
+        font-size: 5em;
+        text-align: center;
+        margin: 0;
+        text-shadow: 2px 2px 0 white;
+    }
+    p {
+        /* color: blue; */
+        font-size: 3em;
+        text-align: center;
+        margin: 0;
+        /* text-shadow: 2px 2px 0 white; */
     }
 </style>
 
